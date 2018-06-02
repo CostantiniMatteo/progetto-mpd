@@ -44,5 +44,10 @@ if __name__ == '__main__':
             out.write(sensor_data_to_csv(f'dataset/{f}.txt'))
 
     # Controllare la consistenza delle rilevazioni
+    for f in files:
+        df = pd.read_csv(f'dataset_csv/{f}.csv', sep=',')
+        df.drop(df[df['start_time'] > df['end_time']].index, inplace=True)
+        df.to_csv(f'dataset_csv/{f}_clean.csv')
+
     # Ordinare in ordine cronologico
     print("Work in progress...")
