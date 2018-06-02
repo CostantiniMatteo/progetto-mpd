@@ -23,8 +23,7 @@ def date_to_timestamp(m):
     )[:-2] # Perché non mi piaceva vedere .0
 
 
-
-if __name__ == '__main__':
+def main():
     # Conversione txt -> csv e conversione date in timestamp
     files = [
         'OrdonezA_ADLs',
@@ -51,3 +50,7 @@ if __name__ == '__main__':
         df.sort_values(by=['start_time'], inplace=True)
         df.drop(df[df['start_time'] > df['end_time']].index, inplace=True)
         df.to_csv(f'dataset_csv/{f}.csv', index=False)
+
+
+if __name__ == '__main__':
+    main()
