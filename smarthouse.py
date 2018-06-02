@@ -1,53 +1,37 @@
-#!/usr/bin/env python
-import re
 import pandas as pd
-from datetime import datetime
-from IPython import embed
+import numpy as np
 
-# Conversione del dataset da file .txt a file .csv
-def sensor_data_to_csv(path):
-    date_regex = re.compile(r'\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}[ ]?')
-    with open(path, 'r') as f:
-        next(f); next(f);
-        lines = [x.strip() for x in f.readlines()]
-        text = "\n".join(lines)
-        text = re.sub(r'[ \t]*\t+', ',', text)
-        text = re.sub(date_regex, date_to_timestamp, text)
+pd.set_option('display.expand_frame_repr', False)
 
-    return text
-
-
-def date_to_timestamp(m):
-    return str(
-        datetime.strptime(m.group().strip(), "%Y-%m-%d %H:%M:%S").timestamp()
-    )[:-2] # Perché non mi piaceva vedere .0
-
+def find_state(timestamp, states):
+    l = np.asarray(states)
+    idx = (np.abs(l - timestamp)).argmin()
+    return states[idx]
 
 
 if __name__ == '__main__':
-    # Convertire txt -> csv e conversione date in timestamp
-    files = [
-        'OrdonezA_ADLs',
-        'OrdonezB_ADLs',
-        'OrdonezA_Sensors',
-        'OrdonezB_Sensors',
+    datasets_state = ['OrdonezA_ADLs.csv', 'OrdonezB_ADLs.csv']
+    datasets_obs = ['OrdonezA_Sensors.csv', 'OrdonezB_Sensors.csv']
+
+    states = pd.read_csv(f'dataset_csv/{datasets_state[0]}')
+    obs = pd.read_csv(f'dataset_csv/{datasets_obs[0]}')
+
+    states['mean_timestamp'] = (states['start_time'] + states['end_time']) // 2
+    obs['mean_timestamp'] = (obs['start_time'] + obs['end_time']) // 2
+
+    obs['state_timestamp'] = 0
+    for i, row in obs.iterrows():
+        obs.set_value(i, 'state_timestamp',
+            find_state(row[5], states['mean_timestamp'])
+        )
+
+    merged = pd.merge(obs, states,
+        left_on='state_timestamp',right_on='mean_timestamp'
+    )
+    merged.drop(columns=['state_timestamp'], axis=1, inplace=True)
+    merged.columns = ['start_time_sensor', 'end_time_sensor', 'location',
+        'type', 'place', 'mean_sensor', 'start_time_activity',
+        'end_time_activity', 'activity', 'mean_activity'
     ]
-    fieldnames_ADL = ['start_time', 'end_time', 'activity']
-    fieldnames_sensors = ['start_time', 'end_time', 'location','type', 'place']
-    for f in files:
-        with open(f'dataset_csv/{f}.csv', 'w') as out:
-            if f.find('ADL') > 0:
-                out.write(','.join(fieldnames_ADL))
-            else:
-                out.write(','.join(fieldnames_sensors))
-            out.write('\n')
-            out.write(sensor_data_to_csv(f'dataset/{f}.txt'))
 
-    # Controllare la consistenza delle rilevazioni
-    for f in files:
-        df = pd.read_csv(f'dataset_csv/{f}.csv', sep=',')
-        df.drop(df[df['start_time'] > df['end_time']].index, inplace=True)
-        df.to_csv(f'dataset_csv/{f}_clean.csv')
-
-    # Ordinare in ordine cronologico
-    print("Work in progress...")
+    merged.to_csv('dataset_csv/full.csv', sep=',', index=False)
