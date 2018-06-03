@@ -1,7 +1,8 @@
 #!/usr/bin/env python
-import re
+import re, io
 import pandas as pd
 from datetime import datetime
+from IPython import embed
 
 
 # Conversione del dataset da file .txt a file .csv
@@ -35,18 +36,17 @@ def main():
     fieldnames_sensors = ['start_time', 'end_time', 'location','type', 'place']
 
     for f in files:
-        # TODO: Usare StringIO in modo da scrivere il file solo una volta
-        with open(f'dataset_csv/{f}.csv', 'w') as out:
-            if f.find('ADL') > 0:
-                out.write(','.join(fieldnames_ADL))
-            else:
-                out.write(','.join(fieldnames_sensors))
-            out.write('\n')
-            out.write(sensor_data_to_csv(f'dataset/{f}.txt'))
+        out = io.StringIO()
+        if f.find('ADL') > 0:
+            out.write(','.join(fieldnames_ADL))
+        else:
+            out.write(','.join(fieldnames_sensors))
+        out.write('\n')
+        out.write(sensor_data_to_csv(f'dataset/{f}.txt'))
+        out.seek(0)
 
-    # Controllo consistenza delle rilevazioni e sort degli eventi
-    for f in files:
-        df = pd.read_csv(f'dataset_csv/{f}.csv', sep=',')
+        # Controllo consistenza delle rilevazioni e sort degli eventi
+        df = pd.read_csv(out, sep=',')
         df.sort_values(by=['start_time'], inplace=True)
         df.drop(df[df['start_time'] > df['end_time']].index, inplace=True)
         df.to_csv(f'dataset_csv/{f}.csv', index=False)
