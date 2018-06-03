@@ -1,10 +1,9 @@
 #!/usr/bin/env python
+
 import re, io, os
 import pandas as pd
 import numpy as np
 from datetime import datetime
-from IPython import embed
-import smarthouse
 
 
 pd.set_option('display.expand_frame_repr', False)
