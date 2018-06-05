@@ -1,11 +1,11 @@
 #!/usr/bin/env python
-
 import re, io, os
 import pandas as pd
 import numpy as np
 from datetime import datetime
 
 
+# Per stampare le colonne del dataframe senza che vada a capo
 pd.set_option('display.expand_frame_repr', False)
 
 # Conversione del dataset da file .txt a file .csv
@@ -21,12 +21,14 @@ def sensor_data_to_csv(path):
     return text
 
 
+# Parsa la data
 def date_to_timestamp(m):
     return str(
         datetime.strptime(m.group().strip(), "%Y-%m-%d %H:%M:%S").timestamp()
     )[:-2] # Perché non mi piaceva vedere .0
 
 
+# Trova lo stato più "vicino" alla rilevazione del sensore al tempo timestamp
 def find_state(timestamp, states):
     l = np.asarray(states)
     idx = (np.abs(l - timestamp)).argmin()
@@ -90,9 +92,13 @@ def main():
             'end_time_activity', 'activity', 'mean_activity'
         ]
 
-        merged.to_csv(f'dataset_csv/full_{"A" if i == 0 else "B"}.csv',
-            sep=',', index=False)
+        # Conversione dei valori categorici in interi
+        cols = ['location', 'type', 'place', 'activity']
+        merged[cols] = merged[cols].apply(lambda x: x.astype('category'))
+        merged[cols] = merged[cols].apply(lambda x: x.cat.codes)
 
+        merged.to_csv(f'dataset_csv/Ordonez{"A" if i == 0 else "B"}.csv',
+            sep=',', index=False)
 
 
 if __name__ == '__main__':
