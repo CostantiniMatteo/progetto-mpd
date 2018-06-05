@@ -85,15 +85,14 @@ def main():
         )
 
         # Drop colonne inutili e rename
-        merged.drop(columns=['state_timestamp', 'index_x', 'index_y'],
-            axis=1, inplace=True)
+        merged.drop(axis=1, inplace=True,
+            columns=['state_timestamp', 'index_x', 'index_y', 'type', 'place'])
         merged.columns = ['start_time_sensor', 'end_time_sensor', 'location',
-            'type', 'place', 'mean_sensor', 'start_time_activity',
-            'end_time_activity', 'activity', 'mean_activity'
-        ]
+            'mean_sensor', 'start_time_activity', 'end_time_activity',
+            'activity', 'mean_activity']
 
         # Conversione dei valori categorici in interi
-        cols = ['location', 'type', 'place', 'activity']
+        cols = ['location', 'activity']
         merged[cols] = merged[cols].apply(lambda x: x.astype('category'))
         merged[cols] = merged[cols].apply(lambda x: x.cat.codes)
 
