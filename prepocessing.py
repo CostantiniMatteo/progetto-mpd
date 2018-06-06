@@ -18,16 +18,40 @@ def txt_to_csv(path):
     return df
 
 
+# Join tra attività e sensore se i due eventi si accavallano
+def merge_datasets(adl, obs):
+    start_times = []; end_times = []; activities = []; sensors = []
+    for i in range(adl.shape[0]):
+        start = adl.loc[i, 'start_time']
+        end = adl.loc[i, 'end_time']
+        state = adl.loc[i, 'activity']
+
+        # I due eventi si accavallano
+        q =  obs.query('@end >= start_time and end_time >= @start')
+        for j, row in q.iterrows():
+            start_times.append(row['start_time'])
+            end_times.append(row['end_time'])
+            activities.append(state)
+            sensors.append(row['location'])
+
+    merged = pd.DataFrame(
+        columns=['start_time', 'end_time', 'activity', 'sensor'],
+        data = {
+            'start_time': start_times,
+            'end_time': end_times,
+            'activity': activities,
+            'sensor': sensors,
+        }
+    )
+
+    merged.sort_values(by=['start_time'], inplace=True)
+
+    return merged
+
+
 # Parsa la data
 def date_to_timestamp(m):
     return int(datetime.strptime(m.strip(), "%Y-%m-%d %H:%M:%S").timestamp())
-
-
-# Trova lo stato più "vicino" alla rilevazione del sensore al tempo timestamp
-def find_state(timestamp, states):
-    l = np.asarray(states)
-    idx = (np.abs(l - timestamp)).argmin()
-    return states[idx]
 
 
 def main():
@@ -52,30 +76,9 @@ def main():
         adl = dfs[files[2 * f]]
         obs = dfs[files[2 * f + 1]]
 
-        # Join tra le attività e sensore se i due eventi si accavallano
-        start_times = []; end_times = []; activities = []; sensors = []
-        for i in range(adl.shape[0]):
-            start = adl.loc[i, 'start_time']
-            end = adl.loc[i, 'end_time']
-            state = adl.loc[i, 'activity']
-
-            # I due eventi si accavallano
-            q =  obs.query('@end >= start_time and end_time >= @start')
-            for j, row in q.iterrows():
-                start_times.append(row['start_time'])
-                end_times.append(row['end_time'])
-                activities.append(state)
-                sensors.append(row['location'])
-
-        merged = pd.DataFrame(
-            columns=['start_time', 'end_time', 'activity', 'sensor'],
-            data = {
-                'start_time': start_times,
-                'end_time': end_times,
-                'activity': activities,
-                'sensor': sensors,
-            }
-        )
+        # Associa l'attività di ogni sensore ad ogni evento che si è verificato
+        # durante l'attività del sensore.
+        merged = merge_datasets(adl, obs)
 
         # Conversione dei valori categorici in interi
         cols = ['sensor', 'activity']
