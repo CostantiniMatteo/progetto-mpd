@@ -5,7 +5,6 @@ import numpy as np
 pd.set_option('display.expand_frame_repr', False)
 np.set_printoptions(precision=2)
 
-
 def probability_distribution(seq1, seq2):
     n = 1 + max(seq1); m = 1 + max(seq2)
     M = np.zeros((n, m))
@@ -38,8 +37,6 @@ def obs_matrix(seq, obs):
     return probability_distribution(seq, obs)
 
 
-# TODO: Ad ogni tempo t viene associata l'osservazione di un solo sensore oppure
-#       un vettore binario che indica per ogni sensore se è attivo?
 def main():
     df = pd.read_csv('dataset_csv/OrdonezA.csv')
     P = prior(df['activity'])

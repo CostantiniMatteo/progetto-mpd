@@ -20,7 +20,7 @@ def txt_to_csv(path):
 
 # Join tra attività e sensore se i due eventi si accavallano
 def merge_datasets(adl, obs):
-    start_times = []; end_times = []; activities = []; sensors = []
+    start_times = []; end_times = []; activities = []; sensors = []; slices = []
     for i in range(adl.shape[0]):
         start = adl.loc[i, 'start_time']
         end = adl.loc[i, 'end_time']
@@ -33,14 +33,18 @@ def merge_datasets(adl, obs):
             end_times.append(row['end_time'])
             activities.append(state)
             sensors.append(row['location'])
+            slices.append(
+                f"{day_slice(row['start_time'])}_{day_slice(row['end_time'])}"
+            )
 
     merged = pd.DataFrame(
-        columns=['start_time', 'end_time', 'activity', 'sensor'],
+        columns=['start_time', 'end_time', 'activity', 'sensor', 'slice'],
         data = {
             'start_time': start_times,
             'end_time': end_times,
             'activity': activities,
             'sensor': sensors,
+            'slice': slices,
         }
     )
 
@@ -54,8 +58,23 @@ def date_to_timestamp(m):
     return int(datetime.strptime(m.strip(), "%Y-%m-%d %H:%M:%S").timestamp())
 
 
+# Restituisce il minuto del giorno
+def day_minute(timestamp):
+    return ((timestamp // 60) % (24*60))
+
+
+# Suddivide la giornata in 4 slice
+# Restituisce la frazione del giorno a cui appartiene il timestamp
+def day_slice(timestamp):
+    h = ((timestamp // (60*60)) % 24)
+    if h < 6: return 0
+    elif h < 12: return 1
+    elif h < 18: return 2
+    else: return 3
+
+
 def main():
-    os.system('rm dataset_csv/*')
+    if not os.path.exists('dataset_csv'): os.makedirs('dataset_csv')
     files = [
         'OrdonezA_ADLs',
         'OrdonezA_Sensors',
