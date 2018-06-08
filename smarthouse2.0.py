@@ -60,10 +60,10 @@ def main():
         O = obs_matrix(trainset_s, trainset_o)
 
 
-        seq = likeliest_path(P, T, O, trainset_o)[0]
+        seq = likeliest_path(P, T, O, testset_o)[0]
         
         c = 0
-        for i, j in zip(seq, trainset_s):
+        for i, j in zip(seq, testset_s):
             if i == j:
                 c += 1
 
