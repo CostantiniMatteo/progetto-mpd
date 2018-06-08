@@ -1,9 +1,11 @@
 import pandas as pd
 import numpy as np
+from ast import literal_eval
 
 
 pd.set_option('display.expand_frame_repr', False)
-np.set_printoptions(precision=2)
+np.set_printoptions(suppress=True)
+np.set_printoptions(precision=4)
 
 def probability_distribution(seq1, seq2):
     n = 1 + max(seq1); m = 1 + max(seq2)
@@ -38,12 +40,19 @@ def obs_matrix(seq, obs):
 
 
 def main():
-    df = pd.read_csv('dataset_csv/OrdonezA.csv')
+    df = pd.read_csv('dataset_csv/OrdonezA.csv',
+        converters={'sensors': str})
+
+    df[['sensors']] = df[['sensors']].apply(lambda x: x.astype('category'))
+    mapping = dict(enumerate(df['sensors'].cat.categories))
+    df[['sensors']] = df[['sensors']].apply(lambda x: x.cat.codes)
+
     P = prior(df['activity'])
     T = transition_matrix(df['activity'])
-    O = obs_matrix(df['activity'], df['sensor'])
+    O = obs_matrix(df['activity'], df['sensors'])
 
     return P, T, O
+
 
 if __name__ == '__main__':
     main()
