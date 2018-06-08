@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from ast import literal_eval
+from pomegranate import HiddenMarkovModel, DiscreteDistribution, State
 
 
 pd.set_option('display.expand_frame_repr', False)
@@ -40,16 +41,49 @@ def obs_matrix(seq, obs):
 
 
 def main():
-    df = pd.read_csv('dataset_csv/OrdonezA.csv',
-        converters={'sensors': str})
+    for f in ['A', 'B']:
+        df = pd.read_csv(f'dataset_csv/Ordonez{f}.csv',
+            converters={'sensors': str})
 
-    df[['sensors']] = df[['sensors']].apply(lambda x: x.astype('category'))
-    mapping = dict(enumerate(df['sensors'].cat.categories))
-    df[['sensors']] = df[['sensors']].apply(lambda x: x.cat.codes)
+        # Discretizza le osservazioni dei sensori
+        df[['sensors']] = df[['sensors']].apply(lambda x: x.astype('category'))
+        mapping = dict(enumerate(df['sensors'].cat.categories))
+        df[['sensors']] = df[['sensors']].apply(lambda x: x.cat.codes)
 
-    P = prior(df['activity'])
-    T = transition_matrix(df['activity'])
-    O = obs_matrix(df['activity'], df['sensors'])
+        # TODO: Suddividere in train e test set
+        size = int(df.shape[0]*0.8)
+        trainset_s = df['activity'][:size]; testset_s = df['activity'][size:]
+        trainset_o = df['sensors'][:size]; testset_o = df['sensors'][size:]
+
+        P = prior(trainset_s)
+        T = transition_matrix(trainset_s)
+        O = obs_matrix(trainset_s, trainset_o)
+
+        model = HiddenMarkovModel(name=f"model{f}")
+        # Inizializzazione gli stati
+        states = []
+        for i in range(O.shape[0]):
+            d = dict(enumerate(O[i,:]))
+            states.append(State(DiscreteDistribution(d), name=f'{i}'))
+        model.add_states(*states)
+
+        # Definizione delle probabilità iniziali
+        for i, p in enumerate(P):
+            model.add_transition(model.start, states[i], p)
+
+        # Definizione delle transizioni tra stati
+        for i, s1 in enumerate(states):
+            for j, s2 in enumerate(states):
+                model.add_transition(s1, s2, T[i, j])
+
+    #           (
+    #            )
+    #       __..---..__
+    #   ,-='  /  |  \  `=-.
+    #  :--..___________..--;
+    #   \.,_____________,./
+        model.bake()
+
 
     return P, T, O
 
