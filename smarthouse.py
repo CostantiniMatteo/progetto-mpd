@@ -64,20 +64,20 @@ def main():
         # Esegue l'algoritmo di Viterbi(1) sul testset e calcola
         # calcola la percentuale di stati predetti correttamente
         seq1, T1, T2 = viterbi(testset_o, T, O, P)
-        c = 0
+        c1 = 0
         for i, j in zip(seq1, testset_s):
             if i == j:
-                c += 1
-        print(c/len(seq1))
+                c1 += 1
+        print(f"Algoritmo 1, dataset {f}, trainset: {size}: {c1/len(seq1)}")
 
         # Esegue l'algoritmo di Viterbi(2) sul testset e calcola
         # calcola la percentuale di stati predetti correttamente
         seq2 = likeliest_path(P, T, O, testset_o)[0]
-        c = 0
+        c2 = 0
         for i, j in zip(seq2, testset_s):
             if i == j:
-                c += 1
-        print(c/len(seq2))
+                c2 += 1
+        print(f"Algoritmo 2, dataset {f}, trainset: {size}: {c2/len(seq2)}")
 
     return P, T, O
 
