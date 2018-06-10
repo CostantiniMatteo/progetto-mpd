@@ -50,8 +50,10 @@ def main():
         mapping = dict(enumerate(df['sensors'].cat.categories))
         df[['sensors']] = df[['sensors']].apply(lambda x: x.cat.codes)
 
-        # TODO: Suddividere in train e test set
-        size = int(df.shape[0]*0.8)
+        # TODO: Provare a fare la suddivisione a fine giornata
+        # TODO: Provare a eseguire viterbi su sequenze più brevi...
+        # ... magari anche su pomegrante
+        size = int(df.shape[0]*0.75)
         trainset_s = df['activity'][:size]; testset_s = df['activity'].tolist()[size:]
         trainset_o = df['sensors'][:size]; testset_o = df['sensors'].tolist()[size:]
 
@@ -59,47 +61,23 @@ def main():
         T = transition_matrix(trainset_s)
         O = obs_matrix(trainset_s, trainset_o)
 
-        x, T1, T2 = viterbi(testset_o, T, O, P)
+        # Esegue l'algoritmo di Viterbi(1) sul testset e calcola
+        # calcola la percentuale di stati predetti correttamente
+        seq1, T1, T2 = viterbi(testset_o, T, O, P)
         c = 0
-        for i, j in zip(x, testset_s):
+        for i, j in zip(seq1, testset_s):
             if i == j:
                 c += 1
-        print(c/len(x))
+        print(c/len(seq1))
 
-    #     model = HiddenMarkovModel(name=f"model{f}")
-    #     # Inizializzazione gli stati
-    #     states = []
-    #     for i in range(O.shape[0]):
-    #         d = dict(enumerate(O[i,:]))
-    #         states.append(State(DiscreteDistribution(d), name=f'{i}'))
-    #     model.add_states(*states)
-
-    #     # Definizione delle probabilità iniziali
-    #     for i, p in enumerate(P):
-    #         model.add_transition(model.start, states[i], p)
-
-    #     # Definizione delle transizioni tra stati
-    #     for i, s1 in enumerate(states):
-    #         for j, s2 in enumerate(states):
-    #             model.add_transition(s1, s2, T[i, j])
-
-    # #           (
-    # #            )
-    # #       __..---..__
-    # #   ,-='  /  |  \  `=-.
-    # #  :--..___________..--;
-    # #   \.,_____________,./
-    #     model.bake()
-    #     # import pdb; pdb.set_trace()
-    #     res = model.viterbi(testset_o)
-    #     seq = [i for i, s in res[1]]
-    #     seq = seq[1:]
-    #     c = 0
-    #     for i, j in zip(seq, testset_s):
-    #         if i == j:
-    #             c += 1
-
-    #     print(c/len(seq))
+        # Esegue l'algoritmo di Viterbi(2) sul testset e calcola
+        # calcola la percentuale di stati predetti correttamente
+        seq2 = likeliest_path(P, T, O, testset_o)[0]
+        c = 0
+        for i, j in zip(seq2, testset_s):
+            if i == j:
+                c += 1
+        print(c/len(seq2))
 
     return P, T, O
 
@@ -157,6 +135,51 @@ def viterbi(y, A, B, Pi=None):
 
     return x, T1, T2
 
+
+def likeliest_path(initial, transition, emission, events):
+    """Find the likeliest path in a hidden Markov Model resulting in the
+    given events.
+
+    Arguments:
+    initial: arraylike(n) --- probability of starting in each state
+    transition: arraylike(n, n) -- probability of transition between states
+    emission: arraylike(n, e) -- probability of emitting each event in
+        each state
+    events -- iterable of events
+
+    Returns:
+    path: list(int) -- list of states in the most probable path
+    p: float -- log-likelihood of that path
+
+    """
+    # Use log-likelihoods to avoid floating-point underflow. Note that
+    # we want -inf for the log of zero, so suppress warnings here.
+    with np.errstate(divide='ignore'):
+        initial = np.log10(initial)
+        transition = np.log10(transition)
+        emission = np.log10(emission)
+
+    # List of arrays giving most likely previous state for each state.
+    prev = []
+
+    events = iter(events)
+    logprob = initial + emission[:, next(events)]
+    for event in events:
+        # p[i, j] is log-likelihood of being in state j, having come from i.
+        p = logprob[:, np.newaxis] + transition + emission[:, event]
+        prev.append(np.argmax(p, axis=0))
+        logprob = np.max(p, axis=0)
+
+    # Most likely final state.
+    best_state = np.argmax(logprob)
+
+    # Reconstruct path by following links and then reversing.
+    state = best_state
+    path = [state]
+    for p in reversed(prev):
+        state = p[state]
+        path.append(state)
+    return path[::-1], logprob[best_state]
 
 
 if __name__ == '__main__':
