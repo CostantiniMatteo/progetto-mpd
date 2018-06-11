@@ -82,7 +82,7 @@ def day_period(timestamp):
     else: return 3
 
 
-def main():
+def main(length=60):
     if not os.path.exists('dataset_csv'): os.makedirs('dataset_csv')
     files = [
         'OrdonezA_ADLs',
@@ -118,10 +118,12 @@ def main():
         # durante l'attività del sensore.pa
         start_date = "2011-11-28 00:00:00" if f == 0 else "2012-11-11 00:00:00"
         end_date = "2011-12-11 23:59:59" if f == 0 else "2012-12-02 23:59:59"
-        merged = merge_dataset(adl, obs, start_date, end_date)
+        merged = merge_dataset(adl, obs, start_date, end_date, length=length)
 
-        merged.to_csv(f'dataset_csv/Ordonez{"A" if f == 0 else "B"}.csv',
-            sep=',', index=False)
+        merged.to_csv(
+            f'dataset_csv/Ordonez{"A" if f == 0 else "B"}_{length}.csv',
+            sep=',', index=False
+        )
 
 
 if __name__ == '__main__':

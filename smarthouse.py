@@ -45,9 +45,10 @@ def date_to_timestamp(m):
 
 # TODO: Nice to have: leggere le osservazioni da un csv
 #       ed eseguire Viterbi sulla sequenza letta
-def main(train_perc=0.75, to_date=None):
+def main(train_rate=0.75, to_date=None, length=60):
+    res = []
     for f in ['A', 'B']:
-        df = pd.read_csv(f'dataset_csv/Ordonez{f}.csv',
+        df = pd.read_csv(f'dataset_csv/Ordonez{f}_{length}.csv',
             converters={'sensors': str})
 
         # Discretizza le osservazioni dei sensori
@@ -58,16 +59,23 @@ def main(train_perc=0.75, to_date=None):
         # TODO: Provare a eseguire viterbi su sequenze più brevi...
         # ... magari anche su pomegrante
         # Divisione in testset e trainset
-        size = int(df.shape[0] * train_perc)
+
         if to_date:
             split_at = date_to_timestamp(to_date[f])
-            size = df[df['timestamp'] == split_at].index[0]
-
-        trainset_s = df['activity'][:size]
-        trainset_o = df['sensors'][:size]
-        testset_s = df['activity'].tolist()[size:]
-        testset_o = df['sensors'].tolist()[size:]
-        print(f"Trainset: {trainset_s.shape[0]/df.shape[0]}")
+            trainset = df[df['timestamp'] < split_at]
+            testset = df[df['timestamp'] >= split_at]
+            trainset_s = trainset['activity']
+            trainset_o = trainset['sensors']
+            testset_s = testset['activity'].tolist()
+            testset_o = testset['sensors'].tolist()
+            size = trainset.shape[0]
+        else:
+            size = int(df.shape[0] * train_rate)
+            trainset_s = df['activity'][:size]
+            trainset_o = df['sensors'][:size]
+            testset_s = df['activity'].tolist()[size:]
+            testset_o = df['sensors'].tolist()[size:]
+            print(f"Trainset: {trainset_s.shape[0]/df.shape[0]}")
 
         # Calcolo delle distribuzioni della HMM
         P = prior(trainset_s)
@@ -82,6 +90,7 @@ def main(train_perc=0.75, to_date=None):
             if i == j:
                 c1 += 1
         print(f"Algoritmo 1, dataset {f}, trainset: {size}: {c1/len(seq1)}")
+        res.append(c1/len(seq1))
 
         # Esegue l'algoritmo di Viterbi(2) sul testset e calcola
         # calcola la percentuale di stati predetti correttamente
@@ -92,7 +101,7 @@ def main(train_perc=0.75, to_date=None):
                 c2 += 1
         print(f"Algoritmo 2, dataset {f}, trainset: {size}: {c2/len(seq2)}")
 
-    return P, T, O
+    return res
 
 
 def viterbi(y, A, B, Pi=None):
@@ -196,4 +205,4 @@ def likeliest_path(initial, transition, emission, events):
 
 
 if __name__ == '__main__':
-    main(to_date={'A': '2011-12-10 00:00:00', 'B': '2012-12-01 00:00:00'})
+    main()
