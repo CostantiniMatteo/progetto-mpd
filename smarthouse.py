@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from datetime import datetime
 
 
 pd.set_option('display.expand_frame_repr', False)
@@ -38,9 +39,13 @@ def obs_matrix(seq, obs):
     return probability_distribution(seq, obs)
 
 
+def date_to_timestamp(m):
+    return int(datetime.strptime(m.strip(), "%Y-%m-%d %H:%M:%S").timestamp())
+
+
 # TODO: Nice to have: leggere le osservazioni da un csv
 #       ed eseguire Viterbi sulla sequenza letta
-def main(train_perc=0.75):
+def main(train_perc=0.75, to_date=None):
     for f in ['A', 'B']:
         df = pd.read_csv(f'dataset_csv/Ordonez{f}.csv',
             converters={'sensors': str})
@@ -54,10 +59,15 @@ def main(train_perc=0.75):
         # ... magari anche su pomegrante
         # Divisione in testset e trainset
         size = int(df.shape[0] * train_perc)
+        if to_date:
+            split_at = date_to_timestamp(to_date[f])
+            size = df[df['timestamp'] == split_at].index[0]
+
         trainset_s = df['activity'][:size]
         trainset_o = df['sensors'][:size]
         testset_s = df['activity'].tolist()[size:]
         testset_o = df['sensors'].tolist()[size:]
+        print(f"Trainset: {trainset_s.shape[0]/df.shape[0]}")
 
         # Calcolo delle distribuzioni della HMM
         P = prior(trainset_s)
@@ -186,4 +196,4 @@ def likeliest_path(initial, transition, emission, events):
 
 
 if __name__ == '__main__':
-    main()
+    main(to_date={'A': '2011-12-10 00:00:00', 'B': '2012-12-01 00:00:00'})
