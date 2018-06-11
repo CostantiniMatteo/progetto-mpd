@@ -21,10 +21,10 @@ def txt_to_csv(path):
 
 # TODO: Prendi quella che ne ha di più
 # Discretizza il tempo e unisce i due dataset di attività ed osservazioni
-def merge_dataset(adl, obs, start_date, end_date, length=60):
+def merge_dataset(adl, obs, start_date, end_date, length=60, on_att='location'):
     first_minute = date_to_timestamp(start_date)
     last_minute = date_to_timestamp(end_date)
-    n_sens = max(obs['location']) + 1
+    n_sens = max(obs[on_att]) + 1
 
     timestamps = []; activities = []; sensors = []; periods = []
     for s in tqdm(range(first_minute, last_minute + 1, length)):
@@ -38,7 +38,7 @@ def merge_dataset(adl, obs, start_date, end_date, length=60):
 
         # Trova i sensori attivi al tempo i
         q = obs.query('@e >= start_time and end_time >= @s')
-        sl = q['location'].tolist()
+        sl = q[on_att].tolist()
         active_sensors = "".join('1' if x in sl else '0' for x in range(n_sens))
 
         # Calcola il periodo della giornata
@@ -121,7 +121,7 @@ def main(length=60):
         merged = merge_dataset(adl, obs, start_date, end_date, length=length)
 
         merged.to_csv(
-            f'dataset_csv/Ordonez{"A" if f == 0 else "B"}_{length}.csv',
+            f'dataset_csv/Ordonez{"A" if f == 0 else "B"}.csv',
             sep=',', index=False
         )
 

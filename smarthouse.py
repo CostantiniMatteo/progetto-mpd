@@ -5,7 +5,7 @@ from datetime import datetime
 
 pd.set_option('display.expand_frame_repr', False)
 np.set_printoptions(suppress=True)
-np.set_printoptions(precision=4)
+np.set_printoptions(precision=3)
 
 def probability_distribution(seq1, seq2):
     n = 1 + max(seq1); m = 1 + max(seq2)
@@ -42,13 +42,17 @@ def obs_matrix(seq, obs):
 def date_to_timestamp(m):
     return int(datetime.strptime(m.strip(), "%Y-%m-%d %H:%M:%S").timestamp())
 
+def print_numpy_matrix(m):
+    import sys
+    np.savetxt(sys.stdout, m, '%6.4f')
+
 
 # TODO: Nice to have: leggere le osservazioni da un csv
 #       ed eseguire Viterbi sulla sequenza letta
 def main(train_rate=0.75, to_date=None, length=60):
-    res = []
+    res = []; res2 = []
     for f in ['A', 'B']:
-        df = pd.read_csv(f'dataset_csv/Ordonez{f}_{length}.csv',
+        df = pd.read_csv(f'dataset_csv/Ordonez{f}.csv',
             converters={'sensors': str})
 
         # Discretizza le osservazioni dei sensori
@@ -59,11 +63,10 @@ def main(train_rate=0.75, to_date=None, length=60):
         # TODO: Provare a eseguire viterbi su sequenze più brevi...
         # ... magari anche su pomegrante
         # Divisione in testset e trainset
-
         if to_date:
-            split_at = date_to_timestamp(to_date[f])
-            trainset = df[df['timestamp'] < split_at]
-            testset = df[df['timestamp'] >= split_at]
+            slice_at = to_date[f]
+            trainset = df[df['timestamp'] < slice_at]
+            testset = df[df['timestamp'] >= slice_at]
             trainset_s = trainset['activity']
             trainset_o = trainset['sensors']
             testset_s = testset['activity'].tolist()
@@ -100,8 +103,9 @@ def main(train_rate=0.75, to_date=None, length=60):
             if i == j:
                 c2 += 1
         print(f"Algoritmo 2, dataset {f}, trainset: {size}: {c2/len(seq2)}")
+        res2.append(c2/len(seq2))
 
-    return res
+    return res, res2
 
 
 def viterbi(y, A, B, Pi=None):
@@ -205,4 +209,34 @@ def likeliest_path(initial, transition, emission, events):
 
 
 if __name__ == '__main__':
-    main()
+    import matplotlib.pyplot as plt
+    xs = []; ys1 = []; ys2 = []
+
+    # Plot facendo variare il trainset in percentuale
+    # for i in range(50, 100, 1):
+    #     res1, res2 = main(i/100)
+    #     ys1.append(res1)
+    #     ys2.append(res2)
+    #     xs.append(i)
+
+    # Plot facendo variare il trainset in giorni
+    start_A = date_to_timestamp("2011-11-28 00:00:00")
+    start_B = date_to_timestamp("2012-11-11 00:00:00")
+    for i in range(7, 14):
+        d = {'A': start_A + 86400*i , 'B': start_B + 86400*i}
+        try:
+            res1, res2 = main(to_date=d)
+            ys1.append(res1)
+            ys2.append(res2)
+            xs.append(i)
+            print("Done", i)
+        except:
+            pass
+
+    plt.figure(1)
+    plt.plot(xs, [y_i[0] for y_i in ys1])
+    plt.plot(xs, [y_i[1] for y_i in ys1])
+    plt.figure(2)
+    plt.plot(xs, [y_i[0] for y_i in ys2])
+    plt.plot(xs, [y_i[1] for y_i in ys2])
+    plt.show()
