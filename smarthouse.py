@@ -48,6 +48,8 @@ def print_numpy_matrix(m):
     np.savetxt(sys.stdout, m, '%6.4f')
 
 
+# Genera una sequenza di stati e di osservazioni campionando utilizzando le
+# distribuzioni di probabilità che definiscono la HMM.
 def random_sample(P, T, O, n):
     assert(n > 0)
     states = []; obs = []
@@ -77,8 +79,6 @@ def main(train_rate=0.75, to_date=None, n_samples=0, length=60):
         mapping = dict(enumerate(df['sensors'].cat.categories))
         df[['sensors']] = df[['sensors']].apply(lambda x: x.cat.codes)
 
-        # TODO: Provare a eseguire viterbi su sequenze più brevi...
-        # ... magari anche su pomegrante
         # Divisione in testset e trainset
         if to_date:
             slice_at = to_date[f]
@@ -108,8 +108,6 @@ def main(train_rate=0.75, to_date=None, n_samples=0, length=60):
 
         if n_samples > 0:
             testset_s, testset_o = random_sample(P, T, O, n_samples)
-            # print("Stati: ", testset_s)
-            # print("Osservazioni: ", testset_o)
 
         # Esegue l'algoritmo di Viterbi(1) sul testset e calcola
         # calcola la percentuale di stati predetti correttamente
@@ -235,7 +233,7 @@ def likeliest_path(initial, transition, emission, events):
 
 
 if __name__ == '__main__':
-    main(n_samples=1000)
+    main(n_samples=4000)
     import matplotlib.pyplot as plt
     xs = []; ys1 = []; ys2 = []
 
