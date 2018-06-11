@@ -97,7 +97,7 @@ def main(train_rate=0.75, to_date=None, length=60):
 
         # Esegue l'algoritmo di Viterbi(2) sul testset e calcola
         # calcola la percentuale di stati predetti correttamente
-        seq2 = likeliest_path(P, T, O, testset_o)[0]
+        seq2, p = likeliest_path(P, T, O, testset_o)
         c2 = 0
         for i, j in zip(seq2, testset_s):
             if i == j:
@@ -209,6 +209,7 @@ def likeliest_path(initial, transition, emission, events):
 
 
 if __name__ == '__main__':
+    # main()
     import matplotlib.pyplot as plt
     xs = []; ys1 = []; ys2 = []
 
