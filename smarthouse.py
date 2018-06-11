@@ -1,7 +1,5 @@
 import pandas as pd
 import numpy as np
-from ast import literal_eval
-from pomegranate import HiddenMarkovModel, DiscreteDistribution, State
 
 
 pd.set_option('display.expand_frame_repr', False)
@@ -40,7 +38,9 @@ def obs_matrix(seq, obs):
     return probability_distribution(seq, obs)
 
 
-def main():
+# TODO: Nice to have: leggere le osservazioni da un csv
+#       ed eseguire Viterbi sulla sequenza letta
+def main(train_perc=0.75):
     for f in ['A', 'B']:
         df = pd.read_csv(f'dataset_csv/Ordonez{f}.csv',
             converters={'sensors': str})
@@ -50,13 +50,16 @@ def main():
         mapping = dict(enumerate(df['sensors'].cat.categories))
         df[['sensors']] = df[['sensors']].apply(lambda x: x.cat.codes)
 
-        # TODO: Provare a fare la suddivisione a fine giornata
         # TODO: Provare a eseguire viterbi su sequenze più brevi...
         # ... magari anche su pomegrante
-        size = int(df.shape[0]*0.75)
-        trainset_s = df['activity'][:size]; testset_s = df['activity'].tolist()[size:]
-        trainset_o = df['sensors'][:size]; testset_o = df['sensors'].tolist()[size:]
+        # Divisione in testset e trainset
+        size = int(df.shape[0] * train_perc)
+        trainset_s = df['activity'][:size]
+        trainset_o = df['sensors'][:size]
+        testset_s = df['activity'].tolist()[size:]
+        testset_o = df['sensors'].tolist()[size:]
 
+        # Calcolo delle distribuzioni della HMM
         P = prior(trainset_s)
         T = transition_matrix(trainset_s)
         O = obs_matrix(trainset_s, trainset_o)
