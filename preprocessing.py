@@ -58,9 +58,14 @@ def merge_dataset(adl, obs, start_date, end_date, length=60, on_att='id'):
 
         # Trova l'attività al tempo s
         q = adl.query('@e >= start_time and end_time >= @s')
-        # Se non ci sono attività per il minuto corrente, continua
-        # TODO: Guarda quella prima
-        if q.shape[0] == 0: activity = max(adl['activity'])#continue
+        if q.shape[0] == 0:
+            # Se la configurazione precedente è uguale a quella attuale
+            # probabilmente l'attività è la stessa
+            if len(sensors) > 0 and active_sensors == sensors[-1]:
+                activity = activities[-1]
+            # Stato che indica 'nessuna attività'
+            else:
+                activity = max(adl['activity']) + 1
         else: activity = q.iloc[0]['activity']
 
         # Calcola il periodo della giornata
