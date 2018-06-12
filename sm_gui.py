@@ -29,7 +29,9 @@ class Ui_Dialog(object):
                 self.process_progress2.setValue(value)
             QtWidgets.QApplication.processEvents()
 
+        self.run_button.setEnabled(False)
         preprocessing.main(length=timeslice, on_att=on_att, use_day_period=day_period, on_update=update_progress_bar)
+        self.run_button.setEnabled(True)
 
 
     def do_viterbi(self):
@@ -132,11 +134,8 @@ class Ui_Dialog(object):
         # Progress Bar
         self.process_progress1 = QtWidgets.QProgressBar(self.processing_groupbox)
         self.process_progress1.setGeometry(QtCore.QRect(340, 60, 113, 32))
-        # self.process_progress1.show()
         self.process_progress2 = QtWidgets.QProgressBar(self.processing_groupbox)
         self.process_progress2.setGeometry(QtCore.QRect(340, 80, 113, 32))
-        # self.process_progress2.show()
-
 
         # Hidden Markov Model
         self.hmm_groupbox = QtWidgets.QGroupBox(Dialog)

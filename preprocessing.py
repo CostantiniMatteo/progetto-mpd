@@ -50,7 +50,7 @@ def merge_dataset(adl, obs, start_date, end_date, length=60,
     for i, s in tqdm(enumerate(range(first_minute, last_minute + 1, length))):
         if on_update:
             on_update(
-                i/((last_minute - first_minute - 1) / length) * 100,
+                i/((last_minute - first_minute - 1) / length) * 100 + 1,
                 'A' if (last_minute - first_minute) / 86400 < 15 else 'B'
             )
         e = s + length - 1
