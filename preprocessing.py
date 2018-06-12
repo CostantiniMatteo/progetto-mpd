@@ -40,14 +40,16 @@ def day_period(timestamp):
 
 
 # Discretizza il tempo e unisce i due dataset di attività ed osservazioni
-def merge_dataset(adl, obs, start_date, end_date,
-                  length=60, on_att='id', user_day_period=False):
+def merge_dataset(adl, obs, start_date, end_date, length=60,
+                  on_update=None, on_att='id', user_day_period=False):
     first_minute = date_to_timestamp(start_date)
     last_minute = date_to_timestamp(end_date)
     n_sens = max(obs[on_att]) + 1
 
     timestamps = []; activities = []; sensors = []; periods = []
-    for s in tqdm(range(first_minute, last_minute + 1, length)):
+    for i, s in tqdm(enumerate(range(first_minute, last_minute + 1, length))):
+        if on_update:
+            on_update(i/((last_minute - first_minute - 1) / length) * 100)
         e = s + length - 1
 
         # Trova i sensori attivi al tempo s
@@ -90,7 +92,8 @@ def merge_dataset(adl, obs, start_date, end_date,
     return result
 
 
-def main(length=60, on_att='id', use_day_period=False, save_in_sliced=False):
+def main(length=60, on_att='id', use_day_period=False,
+         save_in_sliced=False, on_update=None):
     if not os.path.exists('dataset_csv'): os.makedirs('dataset_csv')
     files = [
         'OrdonezA_ADLs',
@@ -131,18 +134,14 @@ def main(length=60, on_att='id', use_day_period=False, save_in_sliced=False):
         start_date = "2011-11-28 00:00:00" if f == 0 else "2012-11-11 00:00:00"
         end_date = "2011-12-11 23:59:59" if f == 0 else "2012-12-02 23:59:59"
         merged = merge_dataset(adl, obs, start_date, end_date, length=length,
-            on_att=on_att, user_day_period=use_day_period)
+            on_att=on_att, user_day_period=use_day_period, on_update=on_update)
 
         if save_in_sliced:
-            merged.to_csv(
-                f'dataset_csv/sliced/Ordonez{"A" if f == 0 else "B"}_{length}.csv',
-                sep=',', index=False
-            )
+            path =f'dataset_csv/sliced/Ordonez{"A" if f == 0 else "B"}_{length}.csv'
+            merged.to_csv(path, sep=',', index=False, on_update=on_update)
         else:
-            merged.to_csv(
-                f'dataset_csv/Ordonez{"A" if f == 0 else "B"}.csv',
-                sep=',', index=False
-            )
+            path = f'dataset_csv/Ordonez{"A" if f == 0 else "B"}.csv',
+            merged.to_csv(path, sep=',', index=False)
 
 
 if __name__ == '__main__':

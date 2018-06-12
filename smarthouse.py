@@ -116,9 +116,10 @@ def random_sample(P, T, O, n):
     return states, obs
 
 
-def main(train_rate=0.75, to_date=None, n_samples=0, length=None):
+def main(train_rate=0.75, to_date=None, n_samples=0,
+         length=None, datasets=['A', 'B']):
     res = []
-    for f in ['A', 'B']:
+    for f in datasets:
         if length:
             df = pd.read_csv(f'dataset_csv/sliced/Ordonez{f}_{length}.csv',
                 converters={'sensors': str})
@@ -172,9 +173,9 @@ def main(train_rate=0.75, to_date=None, n_samples=0, length=None):
                 c += 1
         print(f"Dataset {f}, trainset: {size}: {c/len(seq):.3f}")
         # print(seq)
-        res.append(c/len(seq))
+        accuracy = c/len(seq)
 
-    return res
+    return testset_s, seq, accuracy
 
 
 if __name__ == '__main__':

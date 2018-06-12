@@ -25,7 +25,36 @@ class Ui_Dialog(object):
 
 
     def do_viterbi(self):
-        pass
+        datasets = ['A'] if self.a_radio.isChecked() else ['B']
+        to_date = None
+        if self.split_radio.isChecked():
+            start_A = smarthouse.date_to_timestamp("2011-11-28 00:00:00")
+            start_B = smarthouse.date_to_timestamp("2012-11-11 00:00:00")
+            days = self.days_spin.value()
+            to_date = {'A': start_A + 86400*(14-days), 'B': start_B + 86400*(21 - days)}
+        n_samples = 0 if not self.sampling_radio.isChecked() else self.samples_spin.value()
+
+        sample, predicted, accuracy = smarthouse.main(to_date=to_date, n_samples=n_samples, datasets=datasets)
+        sample = list(map(lambda v: f'&nbsp;&nbsp;{v}' if v < 10 else str(v), sample))
+        predicted = list(map(lambda v: f'&nbsp;&nbsp;{v}' if v < 10 else str(v), predicted))
+
+        for i in range(len(sample)):
+            if sample[i] == predicted[i]:
+                sample[i] = predicted[i] = f"<font face='mono' color='green'>&nbsp;{sample[i]}</font>"
+            else:
+                sample[i] = f"<font face='mono' color='red'>&nbsp;{sample[i]}</font>"
+                predicted[i] = f"<font face='mono' color='red'>&nbsp;{predicted[i]}</font>"
+
+        sample_rows = [" ".join(sample[x : x + 5]) for x in range(0, len(sample), 5)]
+        sample_text = "<br>&nbsp;&nbsp;&nbsp;&nbsp;".join(sample_rows)
+
+        predicted_rows = [" ".join(predicted[x : x + 5]) for x in range(0, len(predicted), 5)]
+        predicted_text = "<br>&nbsp;&nbsp;&nbsp;&nbsp;".join(predicted_rows)
+
+        self.accuracy_value_label.setText(f'{accuracy*100:.3f}')
+        self.sample_textbrowser.setText('&nbsp;&nbsp;&nbsp;&nbsp;' + sample_text)
+        self.predicted_textbrowser.setText('&nbsp;&nbsp;&nbsp;&nbsp;' + predicted_text)
+
 
     def setupUi(self, Dialog):
         Dialog.setObjectName("Dialog")
@@ -91,6 +120,10 @@ class Ui_Dialog(object):
         self.place_checkbox.setFont(font)
         self.place_checkbox.setLayoutDirection(QtCore.Qt.RightToLeft)
         self.place_checkbox.setObjectName("place_checkbox")
+
+        # Progress Bar
+        self.process_progress = QtWidgets.QProgressBar(self.processing_groupbox)
+        self.process_progress.setGeometry(QtCore.QRect(340, 60, 113, 32))
 
         # Hidden Markov Model
         self.hmm_groupbox = QtWidgets.QGroupBox(Dialog)
@@ -187,6 +220,7 @@ class Ui_Dialog(object):
         self.run_button = QtWidgets.QPushButton(self.hmm_groupbox)
         self.run_button.setGeometry(QtCore.QRect(340, 30, 113, 32))
         self.run_button.setObjectName("run_button")
+        self.run_button.clicked.connect(self.do_viterbi)
 
         # Results
         self.results_groupbox = QtWidgets.QGroupBox(Dialog)
@@ -199,9 +233,9 @@ class Ui_Dialog(object):
         self.results_groupbox.setObjectName("results_groupbox")
 
         # Samples
-        self.sample_listview = QtWidgets.QListView(self.results_groupbox)
-        self.sample_listview.setGeometry(QtCore.QRect(20, 61, 201, 171))
-        self.sample_listview.setObjectName("sample_listview")
+        self.sample_textbrowser = QtWidgets.QTextBrowser(self.results_groupbox)
+        self.sample_textbrowser.setGeometry(QtCore.QRect(20, 61, 201, 171))
+        self.sample_textbrowser.setObjectName("sample_textbrowser")
         self.sample_label = QtWidgets.QLabel(self.results_groupbox)
         self.sample_label.setGeometry(QtCore.QRect(20, 35, 101, 21))
         font = QtGui.QFont()
@@ -210,9 +244,9 @@ class Ui_Dialog(object):
         self.sample_label.setObjectName("sample_label")
 
         # Predicted
-        self.predicted_listview = QtWidgets.QListView(self.results_groupbox)
-        self.predicted_listview.setGeometry(QtCore.QRect(240, 61, 201, 171))
-        self.predicted_listview.setObjectName("predicted_listview")
+        self.predicted_textbrowser = QtWidgets.QTextBrowser(self.results_groupbox)
+        self.predicted_textbrowser.setGeometry(QtCore.QRect(240, 61, 201, 171))
+        self.predicted_textbrowser.setObjectName('predicted_textbrowser')
         self.predicted_label = QtWidgets.QLabel(self.results_groupbox)
         self.predicted_label.setGeometry(QtCore.QRect(240, 35, 101, 21))
         font = QtGui.QFont()
@@ -234,6 +268,15 @@ class Ui_Dialog(object):
         self.accuracy_value_label.setFont(font)
         self.accuracy_value_label.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.accuracy_value_label.setObjectName("accuracy_value_label")
+
+        self.sample_textbrowser.horizontalScrollBar().valueChanged.connect(
+            self.predicted_textbrowser.horizontalScrollBar().setValue)
+        self.sample_textbrowser.verticalScrollBar().valueChanged.connect(
+            self.predicted_textbrowser.verticalScrollBar().setValue)
+        self.predicted_textbrowser.horizontalScrollBar().valueChanged.connect(
+            self.sample_textbrowser.horizontalScrollBar().setValue)
+        self.predicted_textbrowser.verticalScrollBar().valueChanged.connect(
+            self.sample_textbrowser.verticalScrollBar().setValue)
 
         self.retranslateUi(Dialog)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
