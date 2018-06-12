@@ -69,7 +69,7 @@ def random_sample(P, T, O, n):
 # TODO: Nice to have: leggere le osservazioni da un csv
 #       ed eseguire Viterbi sulla sequenza letta
 def main(train_rate=0.75, to_date=None, n_samples=0, length=60):
-    res = []; res2 = []
+    res = []
     for f in ['A', 'B']:
         df = pd.read_csv(f'dataset_csv/Ordonez{f}.csv',
             converters={'sensors': str})
@@ -99,7 +99,7 @@ def main(train_rate=0.75, to_date=None, n_samples=0, length=60):
             trainset_o = df['sensors'][:size]
             testset_s = df['activity'].tolist()[size:]
             testset_o = df['sensors'].tolist()[size:]
-            print(f"Trainset: {trainset_s.shape[0]/df.shape[0]}")
+            print(f"Trainset: {trainset_s.shape[0]/df.shape[0]:.3f}")
 
         # Calcolo delle distribuzioni della HMM
         P = prior(trainset_s)
@@ -108,85 +108,22 @@ def main(train_rate=0.75, to_date=None, n_samples=0, length=60):
 
         if n_samples > 0:
             testset_s, testset_o = random_sample(P, T, O, n_samples)
+            # print(testset_s)
 
-        # Esegue l'algoritmo di Viterbi(1) sul testset e calcola
+        # Esegue l'algoritmo di Viterbi sul testset e calcola
         # calcola la percentuale di stati predetti correttamente
-        seq1, T1, T2 = viterbi(testset_o, T, O, P)
-        c1 = 0
-        for i, j in zip(seq1, testset_s):
+        seq, p = viterbi(P, T, O, testset_o)
+        c = 0
+        for i, j in zip(seq, testset_s):
             if i == j:
-                c1 += 1
-        print(f"Algoritmo 1, dataset {f}, trainset: {size}: {c1/len(seq1)}")
-        res.append(c1/len(seq1))
+                c += 1
+        print(f"Dataset {f}, trainset: {size}: {c/len(seq):.3f}")
+        res.append(c/len(seq))
 
-        # Esegue l'algoritmo di Viterbi(2) sul testset e calcola
-        # calcola la percentuale di stati predetti correttamente
-        seq2, p = likeliest_path(P, T, O, testset_o)
-        c2 = 0
-        for i, j in zip(seq2, testset_s):
-            if i == j:
-                c2 += 1
-        print(f"Algoritmo 2, dataset {f}, trainset: {size}: {c2/len(seq2)}")
-        res2.append(c2/len(seq2))
-
-    return res, res2
+    return res
 
 
-def viterbi(y, A, B, Pi=None):
-    """
-    Return the MAP estimate of state trajectory of Hidden Markov Model.
-
-    Parameters
-    ----------
-    y : array (T,)
-        Observation state sequence. int dtype.
-    A : array (K, K)
-        State transition matrix. See HiddenMarkovModel.state_transition  for
-        details.
-    B : array (K, M)
-        Emission matrix. See HiddenMarkovModel.emission for details.
-    Pi: optional, (K,)
-        Initial state probabilities: Pi[i] is the probability x[0] == i. If
-        None, uniform initial distribution is assumed (Pi[:] == 1/K).
-
-    Returns
-    -------
-    x : array (T,)
-        Maximum a posteriori probability estimate of hidden state trajectory,
-        conditioned on observation sequence y under the model parameters A, B,
-        Pi.
-    T1: array (K, T)
-        the probability of the most likely path so far
-    T2: array (K, T)
-        the x_j-1 of the most likely path so far
-    """
-    # Cardinality of the state space
-    K = A.shape[0]
-    # Initialize the priors with default (uniform dist) if not given by caller
-    Pi = Pi if Pi is not None else np.full(K, 1 / K)
-    T = len(y)
-    T1 = np.empty((K, T), 'd')
-    T2 = np.empty((K, T), 'B')
-
-    # Initilaize the tracking tables from first observation
-    T1[:, 0] = Pi * B[:, y[0]]
-    T2[:, 0] = 0
-
-    # Iterate throught the observations updating the tracking tables
-    for i in range(1, T):
-        T1[:, i] = np.max(T1[:, i - 1] * A.T * B[np.newaxis, :, y[i]].T, 1)
-        T2[:, i] = np.argmax(T1[:, i - 1] * A.T, 1)
-
-    # Build the output, optimal model trajectory
-    x = np.empty(T, 'B')
-    x[-1] = np.argmax(T1[:, T - 1])
-    for i in reversed(range(1, T)):
-        x[i - 1] = T2[x[i], i]
-
-    return x, T1, T2
-
-
-def likeliest_path(initial, transition, emission, events):
+def viterbi(initial, transition, emission, events):
     """Find the likeliest path in a hidden Markov Model resulting in the
     given events.
 
@@ -233,35 +170,23 @@ def likeliest_path(initial, transition, emission, events):
 
 
 if __name__ == '__main__':
-    main(n_samples=4000)
+    # main(n_samples=10000)
     import matplotlib.pyplot as plt
-    xs = []; ys1 = []; ys2 = []
+    xs = []; ys = []
 
-    # Plot facendo variare il trainset in percentuale
-    # for i in range(50, 100, 1):
-    #     res1, res2 = main(i/100)
-    #     ys1.append(res1)
-    #     ys2.append(res2)
-    #     xs.append(i)
+    # Plot dell'accuracy facendo variare il trainset in giorni
+    start_A = date_to_timestamp("2011-11-28 00:00:00")
+    start_B = date_to_timestamp("2012-11-11 00:00:00")
+    for i in range(7, 14):
+        d = {'A': start_A + 86400*i , 'B': start_B + 86400*i}
+        try:
+            res = main(to_date=d)
+            ys.append(res)
+            xs.append(i)
+            print("Done", i)
+        except:
+            pass
 
-    # Plot facendo variare il trainset in giorni
-    # start_A = date_to_timestamp("2011-11-28 00:00:00")
-    # start_B = date_to_timestamp("2012-11-11 00:00:00")
-    # for i in range(7, 14):
-    #     d = {'A': start_A + 86400*i , 'B': start_B + 86400*i}
-    #     try:
-    #         res1, res2 = main(to_date=d)
-    #         ys1.append(res1)
-    #         ys2.append(res2)
-    #         xs.append(i)
-    #         print("Done", i)
-    #     except:
-    #         pass
-
-    # plt.figure(1)
-    # plt.plot(xs, [y_i[0] for y_i in ys1])
-    # plt.plot(xs, [y_i[1] for y_i in ys1])
-    # plt.figure(2)
-    # plt.plot(xs, [y_i[0] for y_i in ys2])
-    # plt.plot(xs, [y_i[1] for y_i in ys2])
-    # plt.show()
+    plt.plot(xs, [y_i[0] for y_i in ys])
+    plt.plot(xs, [y_i[1] for y_i in ys])
+    plt.show()
