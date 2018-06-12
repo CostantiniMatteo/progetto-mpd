@@ -49,7 +49,10 @@ def merge_dataset(adl, obs, start_date, end_date, length=60,
     timestamps = []; activities = []; sensors = []; periods = []
     for i, s in tqdm(enumerate(range(first_minute, last_minute + 1, length))):
         if on_update:
-            on_update(i/((last_minute - first_minute - 1) / length) * 100)
+            on_update(
+                i/((last_minute - first_minute - 1) / length) * 100,
+                'A' if (last_minute - first_minute) / 86400 < 15 else 'B'
+            )
         e = s + length - 1
 
         # Trova i sensori attivi al tempo s
@@ -137,11 +140,17 @@ def main(length=60, on_att='id', use_day_period=False,
             on_att=on_att, user_day_period=use_day_period, on_update=on_update)
 
         if save_in_sliced:
-            path =f'dataset_csv/sliced/Ordonez{"A" if f == 0 else "B"}_{length}.csv'
-            merged.to_csv(path, sep=',', index=False, on_update=on_update)
+            merged.to_csv(
+                f'dataset_csv/sliced/Ordonez{"A" if f == 0 else "B"}_{length}.csv',
+                sep=',',
+                index=False,
+            )
         else:
-            path = f'dataset_csv/Ordonez{"A" if f == 0 else "B"}.csv',
-            merged.to_csv(path, sep=',', index=False)
+            merged.to_csv(
+                f'dataset_csv/Ordonez{"A" if f == 0 else "B"}_{length}.csv',
+                sep=',',
+                index=False,
+            )
 
 
 if __name__ == '__main__':

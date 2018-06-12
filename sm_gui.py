@@ -9,6 +9,7 @@ class Ui_Dialog(object):
         self.samples_spin.setEnabled(not self.samples_spin.isEnabled())
         self.nsamples_label.setEnabled(not self.nsamples_label.isEnabled())
 
+    @QtCore.pyqtSlot()
     def do_process(self):
         timeslice = self.slice_spinbox.value()
         day_period = self.period_checkbox.isChecked()
@@ -21,7 +22,14 @@ class Ui_Dialog(object):
         if location_only: on_att = 'location'
         if place_only: on_att = 'place'
 
-        preprocessing.main(length=timeslice, on_att=on_att, use_day_period=day_period)
+        def update_progress_bar(value, bar):
+            if bar == 'A':
+                self.process_progress1.setValue(value)
+            else:
+                self.process_progress2.setValue(value)
+            QtWidgets.QApplication.processEvents()
+
+        preprocessing.main(length=timeslice, on_att=on_att, use_day_period=day_period, on_update=update_progress_bar)
 
 
     def do_viterbi(self):
@@ -122,8 +130,13 @@ class Ui_Dialog(object):
         self.place_checkbox.setObjectName("place_checkbox")
 
         # Progress Bar
-        self.process_progress = QtWidgets.QProgressBar(self.processing_groupbox)
-        self.process_progress.setGeometry(QtCore.QRect(340, 60, 113, 32))
+        self.process_progress1 = QtWidgets.QProgressBar(self.processing_groupbox)
+        self.process_progress1.setGeometry(QtCore.QRect(340, 60, 113, 32))
+        # self.process_progress1.show()
+        self.process_progress2 = QtWidgets.QProgressBar(self.processing_groupbox)
+        self.process_progress2.setGeometry(QtCore.QRect(340, 80, 113, 32))
+        # self.process_progress2.show()
+
 
         # Hidden Markov Model
         self.hmm_groupbox = QtWidgets.QGroupBox(Dialog)
