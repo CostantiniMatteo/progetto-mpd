@@ -11,9 +11,9 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Smarthouse</string>
   </property>
-  <widget class="QGroupBox" name="groupBox">
+  <widget class="QGroupBox" name="processing_groupbox">
    <property name="geometry">
     <rect>
      <x>10</x>
@@ -32,7 +32,7 @@
    <property name="title">
     <string>Preprocessing</string>
    </property>
-   <widget class="QSpinBox" name="spinBox">
+   <widget class="QSpinBox" name="slice_spinbox">
     <property name="geometry">
      <rect>
       <x>110</x>
@@ -57,7 +57,7 @@
      <number>60</number>
     </property>
    </widget>
-   <widget class="QLabel" name="label">
+   <widget class="QLabel" name="slice_label">
     <property name="geometry">
      <rect>
       <x>20</x>
@@ -75,7 +75,7 @@
      <string>Time slice (s)</string>
     </property>
    </widget>
-   <widget class="QCheckBox" name="checkBox">
+   <widget class="QCheckBox" name="period_checkbox">
     <property name="geometry">
      <rect>
       <x>15</x>
@@ -96,7 +96,7 @@
      <string>Use day period  </string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_3">
+   <widget class="QPushButton" name="process_button">
     <property name="geometry">
      <rect>
       <x>340</x>
@@ -109,7 +109,7 @@
      <string>Process</string>
     </property>
    </widget>
-   <widget class="QCheckBox" name="checkBox_2">
+   <widget class="QCheckBox" name="location_checkbox">
     <property name="geometry">
      <rect>
       <x>190</x>
@@ -130,7 +130,7 @@
      <string>Location only</string>
     </property>
    </widget>
-   <widget class="QCheckBox" name="checkBox_3">
+   <widget class="QCheckBox" name="place_checkbox">
     <property name="geometry">
      <rect>
       <x>190</x>
@@ -152,7 +152,7 @@
     </property>
    </widget>
   </widget>
-  <widget class="QGroupBox" name="groupBox_2">
+  <widget class="QGroupBox" name="hmm_groupbox">
    <property name="geometry">
     <rect>
      <x>10</x>
@@ -171,7 +171,7 @@
    <property name="title">
     <string>Hidden Markov Model</string>
    </property>
-   <widget class="QGroupBox" name="groupBox_4">
+   <widget class="QGroupBox" name="dataset_groupbox">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -183,7 +183,7 @@
     <property name="title">
      <string>Dataset</string>
     </property>
-    <widget class="QRadioButton" name="radioButton">
+    <widget class="QRadioButton" name="a_radio">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -202,7 +202,7 @@
       <bool>true</bool>
      </property>
     </widget>
-    <widget class="QRadioButton" name="radioButton_2">
+    <widget class="QRadioButton" name="b_radio">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -219,7 +219,7 @@
      </property>
     </widget>
    </widget>
-   <widget class="QGroupBox" name="groupBox_5">
+   <widget class="QGroupBox" name="mode_groupbox">
     <property name="geometry">
      <rect>
       <x>100</x>
@@ -231,7 +231,7 @@
     <property name="title">
      <string>Mode</string>
     </property>
-    <widget class="QRadioButton" name="radioButton_5">
+    <widget class="QRadioButton" name="sampling_radio">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -252,7 +252,7 @@
       <string>Random Sampling</string>
      </property>
     </widget>
-    <widget class="QRadioButton" name="radioButton_6">
+    <widget class="QRadioButton" name="split_radio">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -273,7 +273,7 @@
       <string>Split dataset</string>
      </property>
     </widget>
-    <widget class="QSpinBox" name="spinBox_2">
+    <widget class="QSpinBox" name="samples_spin">
      <property name="geometry">
       <rect>
        <x>250</x>
@@ -298,7 +298,7 @@
       <number>3000</number>
      </property>
     </widget>
-    <widget class="QLabel" name="label_2">
+    <widget class="QLabel" name="nsamples_label">
      <property name="geometry">
       <rect>
        <x>150</x>
@@ -319,7 +319,7 @@
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
      </property>
     </widget>
-    <widget class="QComboBox" name="comboBox">
+    <widget class="QComboBox" name="days_combo">
      <property name="geometry">
       <rect>
        <x>250</x>
@@ -332,7 +332,7 @@
       <string/>
      </property>
     </widget>
-    <widget class="QLabel" name="label_3">
+    <widget class="QLabel" name="days_label">
      <property name="geometry">
       <rect>
        <x>150</x>
@@ -354,7 +354,7 @@
      </property>
     </widget>
    </widget>
-   <widget class="QPushButton" name="pushButton_2">
+   <widget class="QPushButton" name="run_button">
     <property name="geometry">
      <rect>
       <x>340</x>
@@ -368,7 +368,7 @@
     </property>
    </widget>
   </widget>
-  <widget class="QGroupBox" name="groupBox_3">
+  <widget class="QGroupBox" name="results_groupbox">
    <property name="geometry">
     <rect>
      <x>10</x>
@@ -387,7 +387,7 @@
    <property name="title">
     <string>Results</string>
    </property>
-   <widget class="QListView" name="listView">
+   <widget class="QListView" name="sample_listview">
     <property name="geometry">
      <rect>
       <x>20</x>
@@ -397,7 +397,7 @@
      </rect>
     </property>
    </widget>
-   <widget class="QListView" name="listView_2">
+   <widget class="QListView" name="predicted_listview">
     <property name="geometry">
      <rect>
       <x>240</x>
@@ -407,7 +407,7 @@
      </rect>
     </property>
    </widget>
-   <widget class="QLabel" name="label_4">
+   <widget class="QLabel" name="accuracy_label">
     <property name="geometry">
      <rect>
       <x>20</x>
@@ -425,7 +425,7 @@
      <string>Accuracy:</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_5">
+   <widget class="QLabel" name="sample_label">
     <property name="geometry">
      <rect>
       <x>20</x>
@@ -443,7 +443,7 @@
      <string>Sample</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_6">
+   <widget class="QLabel" name="predicted_label">
     <property name="geometry">
      <rect>
       <x>240</x>
@@ -461,7 +461,7 @@
      <string>Predicted</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_7">
+   <widget class="QLabel" name="accuracy_value_label">
     <property name="geometry">
      <rect>
       <x>100</x>
