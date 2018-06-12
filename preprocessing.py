@@ -40,7 +40,8 @@ def day_period(timestamp):
 
 
 # Discretizza il tempo e unisce i due dataset di attività ed osservazioni
-def merge_dataset(adl, obs, start_date, end_date, length=60, on_att='id'):
+def merge_dataset(adl, obs, start_date, end_date,
+                  length=60, on_att='id', user_day_period=False):
     first_minute = date_to_timestamp(start_date)
     last_minute = date_to_timestamp(end_date)
     n_sens = max(obs[on_att]) + 1
@@ -68,6 +69,8 @@ def merge_dataset(adl, obs, start_date, end_date, length=60, on_att='id'):
 
         # Calcola il periodo della giornata
         period = day_period(s)
+        if user_day_period:
+            active_sensors = active_sensors + period
 
         timestamps.append(s)
         activities.append(activity)
@@ -87,7 +90,7 @@ def merge_dataset(adl, obs, start_date, end_date, length=60, on_att='id'):
     return result
 
 
-def main(length=60, save_in_sliced=False):
+def main(length=60, on_att='id', use_day_period=False, save_in_sliced=False):
     if not os.path.exists('dataset_csv'): os.makedirs('dataset_csv')
     files = [
         'OrdonezA_ADLs',
@@ -127,7 +130,8 @@ def main(length=60, save_in_sliced=False):
         # durante l'attività del sensore.pa
         start_date = "2011-11-28 00:00:00" if f == 0 else "2012-11-11 00:00:00"
         end_date = "2011-12-11 23:59:59" if f == 0 else "2012-12-02 23:59:59"
-        merged = merge_dataset(adl, obs, start_date, end_date, length=length)
+        merged = merge_dataset(adl, obs, start_date, end_date, length=length,
+            on_att=on_att, user_day_period=use_day_period)
 
         if save_in_sliced:
             merged.to_csv(

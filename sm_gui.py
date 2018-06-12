@@ -1,14 +1,32 @@
-# -*- coding: utf-8 -*-
-
-# Form implementation generated from reading ui file 'smarthouse.ui'
-#
-# Created by: PyQt5 UI code generator 5.6
-#
-# WARNING! All changes made in this file will be lost!
-
 from PyQt5 import QtCore, QtGui, QtWidgets
+import preprocessing
+import smarthouse
 
 class Ui_Dialog(object):
+    def toggle_mode(self):
+        self.days_spin.setEnabled(not self.days_spin.isEnabled())
+        self.days_label.setEnabled(not self.days_label.isEnabled())
+        self.samples_spin.setEnabled(not self.samples_spin.isEnabled())
+        self.nsamples_label.setEnabled(not self.nsamples_label.isEnabled())
+
+    def do_process(self):
+        timeslice = self.slice_spinbox.value()
+        day_period = self.period_checkbox.isChecked()
+        location_only = self.location_checkbox.isChecked()
+        place_only = self.place_checkbox.isChecked()
+
+        if location_only and place_only:
+            raise ValueError("Both location and place only are checked. Only one can be checkecd.")
+        on_att = 'id'
+        if location_only: on_att = 'location'
+        if place_only: on_att = 'place'
+
+        preprocessing.main(length=timeslice, on_att=on_att, use_day_period=day_period)
+
+
+    def do_viterbi(self):
+        pass
+
     def setupUi(self, Dialog):
         Dialog.setObjectName("Dialog")
         Dialog.resize(480, 640)
@@ -54,6 +72,7 @@ class Ui_Dialog(object):
         self.process_button = QtWidgets.QPushButton(self.processing_groupbox)
         self.process_button.setGeometry(QtCore.QRect(340, 30, 113, 32))
         self.process_button.setObjectName("process_button")
+        self.process_button.clicked.connect(self.do_process)
 
         # Location Only
         self.location_checkbox = QtWidgets.QCheckBox(self.processing_groupbox)
@@ -110,6 +129,7 @@ class Ui_Dialog(object):
         self.sampling_radio.setFont(font)
         self.sampling_radio.setLayoutDirection(QtCore.Qt.RightToLeft)
         self.sampling_radio.setObjectName("sampling_radio")
+        self.sampling_radio.setChecked(True)
 
         # Split dataset
         self.split_radio = QtWidgets.QRadioButton(self.mode_groupbox)
@@ -119,6 +139,7 @@ class Ui_Dialog(object):
         self.split_radio.setFont(font)
         self.split_radio.setLayoutDirection(QtCore.Qt.RightToLeft)
         self.split_radio.setObjectName("split_radio")
+        self.split_radio.toggled.connect(lambda x: self.toggle_mode())
 
         # Sample number
         self.samples_spin = QtWidgets.QSpinBox(self.mode_groupbox)
@@ -140,10 +161,6 @@ class Ui_Dialog(object):
         self.nsamples_label.setObjectName("nsamples_label")
 
         # Days
-        self.days_combo = QtWidgets.QComboBox(self.mode_groupbox)
-        self.days_combo.setGeometry(QtCore.QRect(250, 61, 81, 26))
-        self.days_combo.setCurrentText("")
-        self.days_combo.setObjectName("days_combo")
         self.days_label = QtWidgets.QLabel(self.mode_groupbox)
         self.days_label.setGeometry(QtCore.QRect(150, 60, 91, 26))
         font = QtGui.QFont()
@@ -151,6 +168,20 @@ class Ui_Dialog(object):
         self.days_label.setFont(font)
         self.days_label.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.days_label.setObjectName("days_label")
+        self.days_label.setEnabled(False)
+
+        self.days_spin = QtWidgets.QSpinBox(self.mode_groupbox)
+        self.days_spin.setGeometry(QtCore.QRect(250, 61, 81, 26))
+        font = QtGui.QFont()
+        font.setBold(False)
+        font.setWeight(50)
+        self.days_spin.setFont(font)
+        self.days_spin.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.days_spin.setMaximum(4)
+        self.days_spin.setMinimum(1)
+        self.days_spin.setProperty("value", 1)
+        self.days_spin.setObjectName("days_spin")
+        self.days_spin.setEnabled(False)
 
         # Run button
         self.run_button = QtWidgets.QPushButton(self.hmm_groupbox)
@@ -231,4 +262,3 @@ class Ui_Dialog(object):
         self.sample_label.setText(_translate("Dialog", "Sample"))
         self.predicted_label.setText(_translate("Dialog", "Predicted"))
         self.accuracy_value_label.setText(_translate("Dialog", "0.00"))
-
