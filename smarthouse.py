@@ -66,13 +66,16 @@ def random_sample(P, T, O, n):
     return states, obs
 
 
-# TODO: Nice to have: leggere le osservazioni da un csv
-#       ed eseguire Viterbi sulla sequenza letta
-def main(train_rate=0.75, to_date=None, n_samples=0, length=60):
+def main(train_rate=0.75, to_date=None, n_samples=0, length=None):
     res = []
     for f in ['A', 'B']:
-        df = pd.read_csv(f'dataset_csv/Ordonez{f}.csv',
+        if length:
+            df = pd.read_csv(f'dataset_csv/sliced/Ordonez{f}_{length}.csv',
+                converters={'sensors': str})
+        else:
+            df = pd.read_csv(f'dataset_csv/Ordonez{f}.csv',
             converters={'sensors': str})
+
 
         # Discretizza le osservazioni dei sensori
         df[['sensors']] = df[['sensors']].apply(lambda x: x.astype('category'))

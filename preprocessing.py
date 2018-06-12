@@ -89,7 +89,7 @@ def merge_dataset(adl, obs, start_date, end_date, length=60, on_att='id'):
     return result
 
 
-def main(length=60):
+def main(length=60, save_in_sliced=False):
     if not os.path.exists('dataset_csv'): os.makedirs('dataset_csv')
     files = [
         'OrdonezA_ADLs',
@@ -131,10 +131,16 @@ def main(length=60):
         end_date = "2011-12-11 23:59:59" if f == 0 else "2012-12-02 23:59:59"
         merged = merge_dataset(adl, obs, start_date, end_date, length=length)
 
-        merged.to_csv(
-            f'dataset_csv/Ordonez{"A" if f == 0 else "B"}.csv',
-            sep=',', index=False
-        )
+        if save_in_sliced:
+            merged.to_csv(
+                f'dataset_csv/sliced/Ordonez{"A" if f == 0 else "B"}_{length}.csv',
+                sep=',', index=False
+            )
+        else:
+            merged.to_csv(
+                f'dataset_csv/Ordonez{"A" if f == 0 else "B"}.csv',
+                sep=',', index=False
+            )
 
 
 if __name__ == '__main__':
