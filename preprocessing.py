@@ -19,7 +19,6 @@ def txt_to_csv(path):
     return df
 
 
-
 # Parsa la data
 def date_to_timestamp(m):
     return int(datetime.strptime(m.strip(), "%Y-%m-%d %H:%M:%S").timestamp())
@@ -40,7 +39,6 @@ def day_period(timestamp):
     else: return 3
 
 
-# TODO: Prendi quella che ne ha di più
 # Discretizza il tempo e unisce i due dataset di attività ed osservazioni
 def merge_dataset(adl, obs, start_date, end_date, length=60, on_att='id'):
     first_minute = date_to_timestamp(start_date)

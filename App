@@ -1,0 +1,13 @@
+from sm_gui import Ui_Dialog
+from PyQt5 import QtWidgets
+
+if __name__ == '__main__':
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    dialog = QtWidgets.QDialog()
+
+    prog = Ui_Dialog()
+    prog.setupUi(dialog)
+
+    dialog.show()
+    sys.exit(app.exec_())

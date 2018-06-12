@@ -178,7 +178,7 @@ def main(train_rate=0.75, to_date=None, n_samples=0, length=None):
 
 
 if __name__ == '__main__':
-    main(n_samples=10000, length=600)
+    main()
     # import matplotlib.pyplot as plt
     # xs = []; ys = []
 
