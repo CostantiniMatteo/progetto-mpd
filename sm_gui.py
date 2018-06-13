@@ -30,6 +30,8 @@ class Ui_Dialog(object):
             QtWidgets.QApplication.processEvents()
 
         self.run_button.setEnabled(False)
+        self.process_progress1.setValue(0)
+        self.process_progress2.setValue(0)
         preprocessing.main(length=timeslice, on_att=on_att, use_day_period=day_period, on_update=update_progress_bar)
         self.run_button.setEnabled(True)
 

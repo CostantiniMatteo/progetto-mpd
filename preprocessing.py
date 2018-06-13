@@ -75,7 +75,7 @@ def merge_dataset(adl, obs, start_date, end_date, length=60,
         # Calcola il periodo della giornata
         period = day_period(s)
         if user_day_period:
-            active_sensors = active_sensors + period
+            active_sensors = active_sensors + str(period)
 
         timestamps.append(s)
         activities.append(activity)
@@ -147,7 +147,7 @@ def main(length=60, on_att='id', use_day_period=False,
             )
         else:
             merged.to_csv(
-                f'dataset_csv/Ordonez{"A" if f == 0 else "B"}_{length}.csv',
+                f'dataset_csv/Ordonez{"A" if f == 0 else "B"}.csv',
                 sep=',',
                 index=False,
             )

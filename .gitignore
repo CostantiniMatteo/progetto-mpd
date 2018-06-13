@@ -130,3 +130,9 @@ octave-workspace
 
 dataset_csv/
 .vscode
+
+# LaTeX
+*.aux
+*.log
+*.synctex.gz
+*.toc
