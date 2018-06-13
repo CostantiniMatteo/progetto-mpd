@@ -158,14 +158,13 @@ def main(train_rate=0.75, to_date=None, n_samples=0,
 
         # Calcolo delle distribuzioni della HMM
         P = prior(trainset_s)
-        T = transition_matrix(trainset_s, n=max(df['activity']) + 1,
-            m=max(df['activity']) + 1)
+        T = transition_matrix(trainset_s,
+            n=max(df['activity']) + 1, m=max(df['activity']) + 1)
         O = obs_matrix(trainset_s, trainset_o,
             n=max(df['activity']) + 1, m=max(df['sensors']) + 1)
 
         if n_samples > 0:
             testset_s, testset_o = random_sample(P, T, O, n_samples)
-            # print(testset_s)
 
         # Esegue l'algoritmo di Viterbi sul testset e calcola
         # calcola la percentuale di stati predetti correttamente
@@ -188,15 +187,18 @@ def main(train_rate=0.75, to_date=None, n_samples=0,
 
 
 if __name__ == '__main__':
-    # main()
+    main()
     import matplotlib.pyplot as plt
     xs = []; ys = []
 
     # # Plot dell'accuracy facendo variare il trainset in giorni
     # start_A = date_to_timestamp("2011-11-28 00:00:00")
     # start_B = date_to_timestamp("2012-11-11 00:00:00")
-    # for i in range(1, 14):
-    #     d = {'A': start_A + 86400*i , 'B': start_B + 86400*i}
+    # for i in range(2, 21):
+    #     d = {
+    #         'A': start_A + 86400 * (i if i < 14 else 13),
+    #         'B': start_B + 86400 * i
+    #     }
     #     # try:
     #     _, _, res = main(to_date=d)
     #     ys.append(res)
