@@ -36,7 +36,7 @@ Focalizzarsi sui problemi dovuti all'anzianità significa, quindi, trovare dei m
 
 Monitorare le azioni quotidiane degli individui è uno dei task più importanti all'interno di quest'ambito, in quanto permette di descrivere il benessere degli abitanti delle case, sia fisico che mentale. Il monitoraggio delle attività avviene grazie all'uso di alcuni sensori, i quali vengono posti in diversi luoghi all'interno di ogni abitazione. 
 
-Questo progetto si colloca nell'ambito appena descritto, in quanto consiste, avendo a disposizione dei dataset contenenti le rilevazioni delle attività e dei sensori in due abitazioni differenti, nella definizione di un modello HMM in grado di inferire le attività data una sequenza di osservazioni derivanti dai sensori. Una volta creata la struttuta HMM, è stata effettuata un'analisi riguardante la capacità predittiva del modello.
+Questo progetto si colloca nell'ambito appena descritto: avendo a disposizione dei dataset contenenti le rilevazioni delle attività e dei sensori in due abitazioni differenti, il lavoro svolto consiste nella definizione di un modello HMM in grado di inferire le attività data una sequenza di osservazioni derivanti dai sensori. Una volta creata la struttuta HMM, è stata effettuata un'analisi riguardante la capacità predittiva del modello.
 
 (INSERIRE LA STRUTTURA DELLA RELAZIONE CHE SEGUIRA). 
 
@@ -47,7 +47,7 @@ I dataset a nostra disposizione erano quattro, due per ogni abitazione, rapprese
 
 Le abitazioni considerate sono due, etichettate con "OrdonezA" ed "OrdonezB".
 \subsection{Analisi del dataset A}
-Per l'abitazione "OrdonezA" sono stati forniti due dataset, uno contenente le attività rilevate, ovvero "OrdonezA\_ADLs", ed uno contenente i sensori rilevati, ovvero "OrdonezA\_Sensors".
+Per l'abitazione "OrdonezA" sono stati forniti due dataset: uno denominato "OrdonezA\_ADLs" contenente le attività rilevate, ed uno denominato "OrdonezA\_Sensors" contenente i sensori rilevati.
 Nel primo dataset, quello delle attività, sono descritti i seguenti campi:
 \begin{itemize}
 	\item Start\_time: data ed ora di inizio della rilevazione di un'attività
@@ -80,7 +80,7 @@ Per entrambi i dataset di A, sono state considerate le rilevazioni ottenute per 
 
 \subsection{Analisi del dataset B}
 
-Per l'abitazione "OrdonezB" sono stati forniti due dataset, uno contenente le attività rilevate, ovvero "OrdonezB\_ADLs", ed uno contenente i sensori rilevati, ovvero "OrdonezB\_Sensors".
+Per l'abitazione "OrdonezB" sono stati forniti due dataset: uno denominato "OrdonezB\_ADLs" contenente le attività rilevate, ed uno denominato  "OrdonezB\_Sensors"	 contenente i sensori rilevati.
 
 Nel primo dataset, quello delle attività, sono descritti i seguenti campi:
 
@@ -114,17 +114,17 @@ in particolare, nella colonna "location" sono stati rilevati 12 sensori in 5 cam
 Per entrambi i dataset di B, sono state considerate le rilevazioni ottenute per un periodo di 21 giorni, dal 11-11-2012 al 2-12-2012.
 
 \subsection{Discretizzazione dei dati}
-La lettura dei dati da parte dei sensori e la conseguente rilevazione delle attività vengono effettuate iterativamente, di conseguenza i dati descritti nei dataset iniziali presentano una disrtibuzione continua; di conseguenza, per ottenere una corretta formattazione temporale dei dati, è necessario effettuare un processo di discretizzazione del tempo.
+La lettura dei dati da parte dei sensori e la conseguente rilevazione delle attività vengono effettuate iterativamente, di conseguenza i dati descritti nei dataset iniziali presentano una disrtibuzione continua; per questo motivo, per ottenere una corretta formattazione temporale dei dati, è necessario effettuare un processo di discretizzazione del tempo.
 
 Il tempo viene quindi diviso in time slices, intervalli regolari spaziati da una predeterminata granularità di tempo $ \Delta t $.
 
-Le rilevazioni di un sensore per ogni time slice \textit{t} sono denotati come $ x^{i}_{t} $ indicante se il sensore i si è attivato almeno una volta tra il tempo \textit{t} ed il tempo $ t + \Delta t $, con $ x^{i}_{t} $ in $ \{0, 1\} $. 
+Le rilevazioni di un sensore per ogni time slice \textit{t} sono denotati come $ x^{i}_{t} $ indicante se il sensore i si è attivato almeno una volta tra il tempo \textit{t} ed il tempo $ t + \Delta t $, con $ x^{i}_{t}  \in  \{0, 1\} $. 
 
 In una casa con N sensori, verrà quindi definito un vettore di osservazioni $ \vec{x_{t}}  = (x^{1}_{t} , x^{2}_{t} , . . . , x^{N-1}_{t} , x^{N}_{t} )^{T} $   per ogni time slice.
 
-Ogni istanza del dataset sarà rappresentato da un'etichetta, che corrisponderà all'attività rilevata in quel segmento di tempo.
+Ogni istanza del dataset sarà rappresentato da un'etichetta che corrisponderà all'attività rilevata in quel segmento di tempo.
 
-L'attività nella time slice \textit{t}, che rappresenta lo stato nel quale è il sistema, è denotato con $ y_{t} $ in $ \{1, . . . , Q\} $ per Q possibili stati; di conseguenza ogni istanza del dataset finale sarà rappresentata da un'etichetta $ y_{t} $ indicante l'attività e da un vettore di osservazioni $ x_{t} $, risultante da una mappatura basata sulla sovrapposizione dell'unità di tempo nella quale è stato rilevato un'attività e si sono attivati i sensori.
+L'attività nel time slice \textit{t}, che rappresenta lo stato nel quale si trova il sistema in quel periodo di tempo, è denotato con $ y_{t}  \in  \{1, . . . , Q\} $ per Q possibili stati; di conseguenza ogni istanza del dataset finale sarà rappresentata da un'etichetta $ y_{t} $ indicante l'attività e da un vettore di osservazioni $ x_{t} $, risultante da una mappatura basata sulla sovrapposizione dell'unità di tempo nella quale è stato rilevato un'attività e si sono attivati i sensori.
 
  Sono stati infine introdotti l'attività "No activity" ed il vettore dei sensori interamente a 0, per rappresentare il fatto che in una time slice non vengano rilevate delle attività o dei sensori.
 
@@ -169,7 +169,7 @@ Ognuno di questi dataset contiene i seguenti campi:
 \section{Creazione del modello HMM}
 
 \subsection{Hidden Markov Models}
-Lo standard HMM è un modello probabilistico definito in termini di una variabile osservabile $ x_{t} $ e di una variabile nascosta $ y_{t} $ ad ogni istante discreto di tempo \textit{t}.
+L' HMM è un modello probabilistico definito in termini di una variabile osservabile $ x_{t} $ e di una variabile nascosta $ y_{t} $ ad ogni istante discreto di tempo \textit{t}.
 
 Nel caso considerato in questo progetto, la variabile osservabile è formata dalle osservazioni dei sensori al tempo t, mentre la variabile nascosta è l'attività da riconoscere.
 
@@ -191,7 +191,7 @@ La distribuzione di probabilità di transizione $ P(y_{t} | y_{t - 1}) $ indica 
 Queste tre distribuzioni descritte precedentemente sono sufficienti alla definizione di un modello.
 
 \subsection{Creazione delle matrici}
-Per creare le matrici è bisogna avere un train set che permetta di trovare le probabilità necessarie alla creazione della matrice.
+Per creare le matrici è necessario avere un train set che permetta di trovare le probabilità necessarie alla creazione della matrice.
 Di seguito verrà spiegato come sono state ottenute le varie matrici.
 
 \subsubsection{Creazione della matrice delle probabilità iniziali}
@@ -202,11 +202,11 @@ Per trovare questa matrice, è stato effettuato il conteggio del numero di volte
 \subsubsection{Creazione della matrice delle transizioni}
 Di seguito verrà introdotto il metodo usato per calcolare la matrice delle transizioni, che sarà una matrice  n x n, dove n è il numero degli stati nascosti(nel nostro caso, le attività).
 
-In questa matrice, il generico elemento M[i][j] indica la probabilità di essere giunti nello stato j, partendo dallo stato i. Per calcolare la matrice, viene effettuato, nel train set, il conteggio del numero di volte che si passa dallo stato i allo stato j; questo valore verrà poi diviso per il numero totale di volte in cui si è passato dallo stato j.
+In questa matrice, il generico elemento M[i][j] indica la probabilità di essere giunti nello stato j, partendo dallo stato i. Per calcolare la matrice viene effettuato il conteggio del numero di volte che si passa dallo stato i allo stato j nel train set; questo valore verrà poi diviso per il numero totale di volte in cui si è passato dallo stato j. Infine, qualora ci siano delle probabilità pari a zero per una transizione da uno stato $i$ a uno stato $j$, questo valore è stato alterato ponendolo uguale a un valore infinitesimale non nullo.
 
 \subsubsection{Creazione della matrice delle emissioni}
 Di seguito verrà introdotto il metodo usato per calcolare la matrice delle emissioni, che sarà una matrice  n x m, dove n è il numero degli stati nascosti(nel nostro caso, le attività) ed m il numero delle osservazioni(nel nostro caso, i sensori).
 
-In questa matrice, il generico elemento M[i][j] indica la probabilità di emettere l'osservazione j, partendo dallo stato i. Per calcolare la matrice, viene effettuato il conteggio del numero di volte, all'interno del train set, che dallo stato i viene emessa l'osservazione j; questo valore verrà poi diviso per il numero totale di volte in cui è stato emesso j.
+In questa matrice, il generico elemento M[i][j] indica la probabilità di emettere l'osservazione j, partendo dallo stato i. Per calcolare la matrice, viene effettuato il conteggio del numero di volte, all'interno del train set, che dallo stato i viene emessa l'osservazione j; questo valore verrà poi diviso per il numero totale di volte in cui è stato emesso j. Come per il caso precedente, se un elemento della matrice ha valore esattamente zero, è stato modificato in modo da avere probabilità estremamente basse, ma non comunque esattamente pari a zero.
 
 \end{document}
