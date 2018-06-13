@@ -4,33 +4,21 @@ import itertools
 import sklearn.metrics
 import matplotlib.pyplot as plt
 
-def confusion_matrix(dataset, train_rate=None, days=None):
+def predict(dataset, train_rate=None, days=None):
     if days:
         start_A = smarthouse.date_to_timestamp("2011-11-28 00:00:00")
         start_B = smarthouse.date_to_timestamp("2012-11-11 00:00:00")
         d = {
-            'A': start_A + 86400*(14-days),
+            'A': start_A + 86400*(14 - days),
             'B': start_B + 86400*(21 - days)
         }
 
-    truth, predict, accuracy = smarthouse.main(
+    return smarthouse.main(
         datasets=[dataset],
         train_rate=train_rate,
         to_date=d
     )
 
-    conf_mat = sklearn.metrics.confusion_matrix(truth, predict)
-
-    print(sklearn.metrics.classification_report(truth, predict))
-
-    np.set_printoptions(precision=2)
-    plt.figure()
-    plot_confusion_matrix(
-        conf_mat,
-        list(map(str, range(max(truth)))),
-        normalize=True
-    )
-    plt.show()
 
 
 def plot_confusion_matrix(cm, classes,
@@ -63,4 +51,26 @@ def plot_confusion_matrix(cm, classes,
     plt.xlabel('Predicted label')
 
 if __name__ == '__main__':
-    confusion_matrix('A', days=3)
+    truth_a, predict_a, accuracy_a = predict('A', days=3)
+    truth_b, predict_b, accuracy_b = predict('B', days=4)
+
+    print(sklearn.metrics.classification_report(truth_a, predict_a))
+    print(sklearn.metrics.classification_report(truth_b, predict_b))
+
+    conf_mat_a = sklearn.metrics.confusion_matrix(truth_a, predict_a)
+    conf_mat_b = sklearn.metrics.confusion_matrix(truth_b, predict_b)
+
+    np.set_printoptions(precision=2)
+    plt.figure(1)
+    plot_confusion_matrix(
+        conf_mat_a,
+        list(map(str, range(max(truth_a)))),
+        normalize=True
+    )
+    plt.figure(2)
+    plot_confusion_matrix(
+        conf_mat_b,
+        list(map(str, range(max(truth_b)))),
+        normalize=True
+    )
+    plt.show()
