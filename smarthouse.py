@@ -7,8 +7,9 @@ pd.set_option('display.expand_frame_repr', False)
 np.set_printoptions(suppress=True)
 np.set_printoptions(precision=3)
 
-def probability_distribution(seq1, seq2):
-    n = 1 + max(seq1); m = 1 + max(seq2)
+def probability_distribution(seq1, seq2, n=None, m=None):
+    if n is None: n = 1 + max(seq1)
+    if m is None: m = 1 + max(seq2)
     M = np.zeros((n, m))
 
     # Conta delle occorrenze
@@ -33,13 +34,13 @@ def prior(transitions):
 
 
 # Calcola la matrice di transizione data la sequenza di stati ad ogni tempo t
-def transition_matrix(sequence):
-    return probability_distribution(sequence, sequence[1:])
+def transition_matrix(sequence, n=None, m=None):
+    return probability_distribution(sequence, sequence[1:], n=n, m=m)
 
 
 # Calcola la distribuzione di probabilità delle osservazioni per ogni stato
-def obs_matrix(seq, obs):
-    return probability_distribution(seq, obs)
+def obs_matrix(seq, obs, n=None, m=None):
+    return probability_distribution(seq, obs, n=n, m=m)
 
 
 def date_to_timestamp(m):
@@ -118,7 +119,7 @@ def random_sample(P, T, O, n):
 
 def main(train_rate=0.75, to_date=None, n_samples=0,
          length=None, datasets=['A', 'B']):
-    res = []
+    truths = []; predicts = []; accs = []
     for f in datasets:
         if length:
             df = pd.read_csv(f'dataset_csv/sliced/Ordonez{f}_{length}.csv',
@@ -157,8 +158,10 @@ def main(train_rate=0.75, to_date=None, n_samples=0,
 
         # Calcolo delle distribuzioni della HMM
         P = prior(trainset_s)
-        T = transition_matrix(trainset_s)
-        O = obs_matrix(trainset_s, trainset_o)
+        T = transition_matrix(trainset_s, n=max(df['activity']) + 1,
+            m=max(df['activity']) + 1)
+        O = obs_matrix(trainset_s, trainset_o,
+            n=max(df['activity']) + 1, m=max(df['sensors']) + 1)
 
         if n_samples > 0:
             testset_s, testset_o = random_sample(P, T, O, n_samples)
@@ -174,28 +177,33 @@ def main(train_rate=0.75, to_date=None, n_samples=0,
         print(f"Dataset {f}, trainset: {size}: {c/len(seq):.3f}")
         # print(seq)
         accuracy = c/len(seq)
+        accs.append(accuracy)
+        truths.append(testset_s)
+        predicts.append(seq)
 
-    return testset_s, seq, accuracy
+    if len(accs) == 1:
+        return truths[0], predicts[0], accs[0]
+
+    return truths, predicts, accs
 
 
 if __name__ == '__main__':
-    main()
-    # import matplotlib.pyplot as plt
-    # xs = []; ys = []
+    # main()
+    import matplotlib.pyplot as plt
+    xs = []; ys = []
 
-
-    # Plot dell'accuracy facendo variare il trainset in giorni
+    # # Plot dell'accuracy facendo variare il trainset in giorni
     # start_A = date_to_timestamp("2011-11-28 00:00:00")
     # start_B = date_to_timestamp("2012-11-11 00:00:00")
-    # for i in range(7, 14):
+    # for i in range(1, 14):
     #     d = {'A': start_A + 86400*i , 'B': start_B + 86400*i}
-    #     try:
-    #         res = main(to_date=d)
-    #         ys.append(res)
-    #         xs.append(i)
-    #         print("Done", i)
-    #     except:
-    #         pass
+    #     # try:
+    #     _, _, res = main(to_date=d)
+    #     ys.append(res)
+    #     xs.append(i)
+    #     print("Done", i)
+    #     # except:
+    #         # pass
 
     # plt.plot(xs, [y_i[0] for y_i in ys])
     # plt.plot(xs, [y_i[1] for y_i in ys])
