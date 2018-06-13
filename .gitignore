@@ -136,3 +136,4 @@ dataset_csv/
 *.log
 *.synctex.gz
 *.toc
+*.r

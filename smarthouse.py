@@ -117,7 +117,7 @@ def random_sample(P, T, O, n):
     return states, obs
 
 
-def main(train_rate=0.75, to_date=None, n_samples=0,
+def main(train_rate=0.75, to_date=None, n_samples=None,
          length=None, datasets=['A', 'B']):
     truths = []; predicts = []; accs = []
     for f in datasets:
@@ -144,7 +144,7 @@ def main(train_rate=0.75, to_date=None, n_samples=0,
             testset_s = testset['activity'].tolist()
             testset_o = testset['sensors'].tolist()
             size = trainset.shape[0]
-        elif n_samples > 0:
+        elif n_samples:
             trainset_s = df['activity']
             trainset_o = df['sensors']
             size = trainset_s.shape[0]
@@ -163,7 +163,7 @@ def main(train_rate=0.75, to_date=None, n_samples=0,
         O = obs_matrix(trainset_s, trainset_o,
             n=max(df['activity']) + 1, m=max(df['sensors']) + 1)
 
-        if n_samples > 0:
+        if n_samples:
             testset_s, testset_o = random_sample(P, T, O, n_samples)
 
         # Esegue l'algoritmo di Viterbi sul testset e calcola
