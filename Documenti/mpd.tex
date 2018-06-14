@@ -241,12 +241,12 @@
 	\subsubsection{Creazione della matrice delle transizioni}
 	Di seguito verrà introdotto il metodo usato per calcolare la matrice delle transizioni, che sarà una matrice  n x n, dove n è il numero degli stati nascosti(nel nostro caso, le attività).
 	
-	In questa matrice, il generico elemento M[i][j] indica la probabilità di essere giunti nello stato j, partendo dallo stato i. Per calcolare la matrice viene effettuato il conteggio del numero di volte che si passa dallo stato i allo stato j nel trainset; questo valore verrà poi diviso per il numero totale di volte in cui si è passato dallo stato j. Infine, qualora ci siano delle probabilità pari a zero per una transizione da uno stato $i$ a uno stato $j$, questo valore è stato alterato ponendolo uguale a un valore infinitesimale non nullo.
+	In questa matrice, il generico elemento M[i][j] indica la probabilità di essere giunti nello stato j, partendo dallo stato i. Per calcolare la matrice viene effettuato il conteggio del numero di volte che si passa dallo stato i allo stato j nel trainset; questo valore verrà poi diviso per il numero totale di volte in cui si è passato dallo stato i. Infine, qualora ci siano delle probabilità pari a zero per una transizione da uno stato $i$ a uno stato $j$, questo valore è stato alterato ponendolo uguale a un valore infinitesimale non nullo.
 	
 	\subsubsection{Creazione della matrice delle emissioni}
 	Di seguito verrà introdotto il metodo usato per calcolare la matrice delle emissioni, che sarà una matrice  n x m, dove n è il numero degli stati nascosti(nel nostro caso, le attività) ed m il numero delle osservazioni(nel nostro caso, i sensori).
 	
-	In questa matrice, il generico elemento M[i][j] indica la probabilità di emettere l'osservazione j, partendo dallo stato i. Per calcolare la matrice, viene effettuato il conteggio del numero di volte, all'interno del trainset, che dallo stato i viene emessa l'osservazione j; questo valore verrà poi diviso per il numero totale di volte in cui è stato emesso j. Come per il caso precedente, se un elemento della matrice ha valore esattamente zero, è stato modificato in modo da avere probabilità estremamente basse, ma non comunque esattamente pari a zero.
+	In questa matrice, il generico elemento M[i][j] indica la probabilità di emettere l'osservazione j, partendo dallo stato i. Per calcolare la matrice, viene effettuato il conteggio del numero di volte, all'interno del trainset, che dallo stato i viene emessa l'osservazione j; questo valore verrà poi diviso per il numero totale di volte in cui si è passati per i. Come per il caso precedente, se un elemento della matrice ha valore esattamente zero, è stato modificato in modo da avere probabilità estremamente basse, ma non comunque esattamente pari a zero.
 	
 	\section{Sperimentazione}
 	
