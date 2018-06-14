@@ -10,7 +10,7 @@ class Ui_Dialog(object):
         self.nsamples_label.setEnabled(not self.nsamples_label.isEnabled())
 
     def toggle_dataset(self):
-        self.max_days = 11 if self.max_days == 18 else 18
+        self.max_days = 13 if self.max_days == 20 else 20
         self.days_spin.setMaximum(self.max_days)
 
     @QtCore.pyqtSlot()
@@ -222,7 +222,7 @@ class Ui_Dialog(object):
         self.days_label.setObjectName("days_label")
         self.days_label.setEnabled(False)
 
-        self.max_days = 11
+        self.max_days = 13
         self.days_spin = QtWidgets.QSpinBox(self.mode_groupbox)
         self.days_spin.setGeometry(QtCore.QRect(250, 61, 81, 26))
         font = QtGui.QFont()

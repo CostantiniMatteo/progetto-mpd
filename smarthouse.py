@@ -30,7 +30,7 @@ def probability_distribution(seq1, seq2, n=None, m=None):
 def prior(transitions):
     g = transitions.groupby(transitions)
     result = g.count()/g.count().sum()
-    return result.as_matrix()
+    return result.reindex(range(max(transitions)+1)).fillna(0).as_matrix()
 
 
 # Calcola la matrice di transizione data la sequenza di stati ad ogni tempo t
