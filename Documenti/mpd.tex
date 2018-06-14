@@ -241,12 +241,12 @@
 	\subsubsection{Creazione della matrice delle transizioni}
 	Di seguito verrà introdotto il metodo usato per calcolare la matrice delle transizioni, che sarà una matrice  n x n, dove n è il numero degli stati nascosti(nel nostro caso, le attività).
 	
-	In questa matrice, il generico elemento M[i][j] indica la probabilità di essere giunti nello stato j, partendo dallo stato i. Per calcolare la matrice viene effettuato il conteggio del numero di volte che si passa dallo stato i allo stato j nel trainset; questo valore verrà poi diviso per il numero totale di volte in cui si è passato dallo stato j. Infine, qualora ci siano delle probabilità pari a zero per una transizione da uno stato $i$ a uno stato $j$, questo valore è stato alterato ponendolo uguale a un valore infinitesimale non nullo.
+	In questa matrice, il generico elemento M[i][j] indica la probabilità di essere giunti nello stato j, partendo dallo stato i. Per calcolare la matrice viene effettuato il conteggio del numero di volte che si passa dallo stato i allo stato j nel trainset; questo valore verrà poi diviso per il numero totale di volte in cui si è passato dallo stato $i$. Infine, qualora ci siano delle probabilità pari a zero per una transizione da uno stato $i$ a uno stato $j$, questo valore è stato alterato ponendolo uguale a un valore infinitesimale non nullo.
 	
 	\subsubsection{Creazione della matrice delle emissioni}
 	Di seguito verrà introdotto il metodo usato per calcolare la matrice delle emissioni, che sarà una matrice  n x m, dove n è il numero degli stati nascosti(nel nostro caso, le attività) ed m il numero delle osservazioni(nel nostro caso, i sensori).
 	
-	In questa matrice, il generico elemento M[i][j] indica la probabilità di emettere l'osservazione j, partendo dallo stato i. Per calcolare la matrice, viene effettuato il conteggio del numero di volte, all'interno del trainset, che dallo stato i viene emessa l'osservazione j; questo valore verrà poi diviso per il numero totale di volte in cui è stato emesso j. Come per il caso precedente, se un elemento della matrice ha valore esattamente zero, è stato modificato in modo da avere probabilità estremamente basse, ma non comunque esattamente pari a zero.
+	In questa matrice, il generico elemento M[i][j] indica la probabilità di emettere l'osservazione j, partendo dallo stato i. Per calcolare la matrice, viene effettuato il conteggio del numero di volte, all'interno del trainset, che dallo stato i viene emessa l'osservazione j; questo valore verrà poi diviso per il numero totale di volte in cui si è passati da i. Come per il caso precedente, se un elemento della matrice ha valore esattamente zero, è stato modificato in modo da avere probabilità estremamente basse, ma non comunque esattamente pari a zero.
 	
 	\section{Sperimentazione}
 	
@@ -479,7 +479,7 @@
 	
 	Nell'ultima coppia di test effettuati sono stati utilizzati, per allenare il modello, i primi cinque giorni contenuti nel dataset, sia per il test su A, sia per il test su B; inoltre, il modello è stato testato in entrambi i casi attraverso la sequenza di osservazioni generate a caso, contenenti 3000 minuti. Le matrici di confusione ottenute sono riportate in figura \ref{fig:a_3ks} per il dataset A e in figura \ref{fig:b_3ks} per il dataset b. Mentre in tabella \ref{tab:a_3ks} e \ref{tab:b_3ks} sono riportate le misure di Precision, Recall ed F-Measure rispettivamente per i dataset A e B.
 	
-	In quest'ultimo esperimento sono stati ottenuti i migliori valori di accuracy, ovvero \textbf{accuracy di 0,968} per il dataset A e \textbf{accuracy di 0,959} per il dataset B.
+	In quest'ultimo esperimento sono stati ottenuti i migliori valori di accuracy, ovvero \textbf{accuracy di 0,968} per il dataset A e \textbf{accuracy di 0,967} per il dataset B.
 	
 	Dalle tabelle \ref{tab:a_3ks} e \ref{tab:b_3ks} e dalle figure \ref{fig:a_3ks} e \ref{fig:b_3ks}, si possono notare gli stati che sono stati predetti con una maggiore accuratezza.
 	
@@ -529,15 +529,17 @@
     	\begin{tabularx}{0.56\textwidth}{l | llll}
     		{} & {precision} & {recall} & {f1-score} & {support} \\
     		\midrule
-            {2} & {0.61} & {0.58} & {0.59} & {19} \\
-            {3} & {0.77} & {0.90} & {0.83} & {155} \\
-            {4} & {0.91} & {1.00} & {0.95} & {136} \\
-            {6} & {1.00} & {1.00} & {1.00} & {1251} \\
-            {7} & {0.77} & {0.82} & {0.79} & {33} \\
-            {8} & {0.99} & {0.99} & {0.99} & {738} \\
-            {9} & {0.30} & {0.27} & {0.29} & {11} \\
-            {10} & {0.94} & {0.88} & {0.91} & {657} \\
-            {avg/total} & {0.96} & {0.96} & {0.96} & {3000} \\
+{0} & {0.98} & {0.91} & {0.95} & {68} \\
+{1} & {0.33} & {0.40} & {0.36} & {5} \\
+{2} & {0.61} & {0.65} & {0.63} & {17} \\
+{4} & {1.00} & {0.90} & {0.95} & {108} \\
+{5} & {0.89} & {0.89} & {0.89} & {18} \\
+{6} & {1.00} & {1.00} & {1.00} & {1370} \\
+{7} & {0.00} & {0.00} & {0.00} & {8} \\
+{8} & {0.99} & {0.98} & {0.98} & {751} \\
+{9} & {0.23} & {0.23} & {0.23} & {13} \\
+{10} & {0.93} & {0.95} & {0.94} & {642} \\
+{avg/total} & {0.97} & {0.97} & {0.97} & {3000} \\
     	\end{tabularx}
     	\captionof{table} {Misure di Precision, Recall ed F-Measure per il dataset B, testset casuale di 3000 campioni}
     	\label{tab:b_3ks}
