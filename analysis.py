@@ -64,35 +64,9 @@ def plot_confusion_matrix(cm, classes,
 if __name__ == '__main__':
     np.set_printoptions(precision=2)
 
-    # A - 3 giorni
-    print("=== A - 3 giorni ===")
-    truth_a, predict_a, accuracy_a = predict('A', days=3)
-    print(sklearn.metrics.classification_report(truth_a, predict_a))
-    conf_mat_a = sklearn.metrics.confusion_matrix(truth_a, predict_a)
-
-    plt.figure(1)
-    plot_confusion_matrix(
-        conf_mat_a,
-        list(map(str, range(max(truth_a)))),
-        normalize=True
-    )
-
-    # B - 4 giorni
-    print("=== B - 4 giorni ===")
-    truth_b, predict_b, accuracy_b = predict('B', days=4)
-    print(sklearn.metrics.classification_report(truth_b, predict_b))
-    conf_mat_b = sklearn.metrics.confusion_matrix(truth_b, predict_b)
-
-    plt.figure(2)
-    plot_confusion_matrix(
-        conf_mat_b,
-        list(map(str, range(max(truth_b)))),
-        normalize=True
-    )
-
     # A - 3000 samples
     print("=== A - 3000 samples ===")
-    truth_a, predict_a, accuracy_a = predict('A', n_samples=3000)
+    truth_a, predict_a, accuracy_a = predict('A', n_samples=3000, days=10)
     print(sklearn.metrics.classification_report(truth_a, predict_a))
     conf_mat_a = sklearn.metrics.confusion_matrix(truth_a, predict_a)
 
@@ -105,7 +79,7 @@ if __name__ == '__main__':
 
     # A - 20000 samples
     print("=== A - 20000 samples ===")
-    truth_a, predict_a, accuracy_a = predict('A', n_samples=20000)
+    truth_a, predict_a, accuracy_a = predict('A', n_samples=20000, days=10)
     print(sklearn.metrics.classification_report(truth_a, predict_a))
     conf_mat_a = sklearn.metrics.confusion_matrix(truth_a, predict_a)
 
@@ -118,7 +92,7 @@ if __name__ == '__main__':
 
     # B - 3000 samples
     print("=== B - 3000 samples ===")
-    truth_b, predict_b, accuracy_b = predict('B', n_samples=3000)
+    truth_b, predict_b, accuracy_b = predict('B', n_samples=3000, days=16)
     print(sklearn.metrics.classification_report(truth_b, predict_b))
     conf_mat_b = sklearn.metrics.confusion_matrix(truth_b, predict_b)
 
@@ -131,7 +105,7 @@ if __name__ == '__main__':
 
     # B - 20000 samples
     print("=== B - 20000 samples ===")
-    truth_b, predict_b, accuracy_b = predict('B', n_samples=20000)
+    truth_b, predict_b, accuracy_b = predict('B', n_samples=20000, days=16)
     print(sklearn.metrics.classification_report(truth_b, predict_b))
     conf_mat_b = sklearn.metrics.confusion_matrix(truth_b, predict_b)
 
@@ -143,8 +117,8 @@ if __name__ == '__main__':
     )
 
     # A - Train su 4 giorni
-    print("=== A - Train 4 giorni ===")
-    truth_a, predict_a, accuracy_a = predict('A', days=10, days_test=3)
+    print("=== A - Train 5 giorni, Test 3 giorni ===")
+    truth_a, predict_a, accuracy_a = predict('A', days=9, days_test=3)
     print(sklearn.metrics.classification_report(truth_a, predict_a))
     conf_mat_a = sklearn.metrics.confusion_matrix(truth_a, predict_a)
 
@@ -155,8 +129,8 @@ if __name__ == '__main__':
         normalize=True
     )
 
-    print("=== A - Train 4 giorni ===")
-    truth_a, predict_a, accuracy_a = predict('A', days=10, days_test=10)
+    print("=== A - Train 5 giorni, Test 10 giorni ===")
+    truth_a, predict_a, accuracy_a = predict('A', days=9, days_test=9)
     print(sklearn.metrics.classification_report(truth_a, predict_a))
     conf_mat_a = sklearn.metrics.confusion_matrix(truth_a, predict_a)
 
@@ -168,8 +142,8 @@ if __name__ == '__main__':
     )
 
     # B - Train su 4 giorni
-    print("=== B - Train 4 giorni, Test 3 giorni ===")
-    truth_b, predict_b, accuracy_b = predict('B', days=3)
+    print("=== B - Train 5 giorni, Test 3 giorni ===")
+    truth_b, predict_b, accuracy_b = predict('B', days=16, days_test=3)
     print(sklearn.metrics.classification_report(truth_b, predict_b))
     conf_mat_b = sklearn.metrics.confusion_matrix(truth_b, predict_b)
 
@@ -180,8 +154,8 @@ if __name__ == '__main__':
         normalize=True
     )
 
-    print("=== B - Train 4 giorni, Test 17 giorni ===")
-    truth_b, predict_b, accuracy_b = predict('B', days=17)
+    print("=== B - Train 5 giorni, Test 16 giorni ===")
+    truth_b, predict_b, accuracy_b = predict('B', days=16, days_test=16)
     print(sklearn.metrics.classification_report(truth_b, predict_b))
     conf_mat_b = sklearn.metrics.confusion_matrix(truth_b, predict_b)
 

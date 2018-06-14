@@ -108,7 +108,7 @@ def random_sample(P, T, O, n):
     obs.append(np.random.choice(range(O.shape[1]), p=O[states[0]]))
 
     i = 0
-    while i < n:
+    while i < n - 1:
         new_state = np.random.choice(range(len(P)), p=T[states[-1]])
         new_obs = np.random.choice(range(O.shape[1]), p=O[states[-1]])
         states.append(new_state); obs.append(new_obs)
@@ -128,7 +128,6 @@ def main(train_rate=0.75, to_date=None, n_samples=None,
             df = pd.read_csv(f'dataset_csv/Ordonez{f}.csv',
             converters={'sensors': str})
 
-
         # Discretizza le osservazioni dei sensori
         df[['sensors']] = df[['sensors']].apply(lambda x: x.astype('category'))
         mapping = dict(enumerate(df['sensors'].cat.categories))
@@ -147,10 +146,6 @@ def main(train_rate=0.75, to_date=None, n_samples=None,
             testset_s = testset['activity'].tolist()
             testset_o = testset['sensors'].tolist()
             size = trainset.shape[0]
-        elif n_samples:
-            trainset_s = df['activity']
-            trainset_o = df['sensors']
-            size = trainset_s.shape[0]
         else:
             size = int(df.shape[0] * train_rate)
             trainset_s = df['activity'][:size]
@@ -178,7 +173,7 @@ def main(train_rate=0.75, to_date=None, n_samples=None,
                 c += 1
         print(f"Dataset {f}, train={size}, test={len(seq)}: {c/len(seq):.3f}")
         print("Likelihood:", p)
-        # print(seq)
+
         accuracy = c/len(seq)
         accs.append(accuracy)
         truths.append(testset_s)
@@ -191,26 +186,4 @@ def main(train_rate=0.75, to_date=None, n_samples=None,
 
 
 if __name__ == '__main__':
-    # main()
-    import matplotlib.pyplot as plt
-    xs = []; ys = []
-
-    # Plot dell'accuracy facendo variare il trainset in giorni
-    start_A = date_to_timestamp("2011-11-28 00:00:00")
-    start_B = date_to_timestamp("2012-11-11 00:00:00")
-    for i in range(2, 21):
-        d = {
-            'A': start_A + 86400 * (i if i < 14 else 13),
-            'B': start_B + 86400 * i
-        }
-        # try:
-        _, _, res = main(to_date=d)
-        ys.append(res)
-        xs.append(i)
-        print("Done", i)
-        # except:
-            # pass
-
-    plt.plot(xs, [y_i[0] for y_i in ys])
-    plt.plot(xs, [y_i[1] for y_i in ys])
-    plt.show()
+    main()
