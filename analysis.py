@@ -4,8 +4,10 @@ import itertools
 import sklearn.metrics
 import matplotlib.pyplot as plt
 
-def predict(dataset, train_rate=None, days=None, n_samples=None):
+def predict(dataset, train_rate=None, days=None,
+            n_samples=None, days_test=None):
     d = None
+    to_date_test = None
     if days:
         start_A = smarthouse.date_to_timestamp("2011-11-28 00:00:00")
         start_B = smarthouse.date_to_timestamp("2012-11-11 00:00:00")
@@ -13,12 +15,19 @@ def predict(dataset, train_rate=None, days=None, n_samples=None):
             'A': start_A + 86400*(14 - days),
             'B': start_B + 86400*(21 - days)
         }
+    if days_test:
+        to_date_test = {
+            'A': start_A + 86400*(14 - days + days_test),
+            'B': start_B + 86400*(21 - days + days_test)
+        }
+
 
     return smarthouse.main(
         datasets=[dataset],
         train_rate=train_rate,
         to_date=d,
-        n_samples=n_samples
+        n_samples=n_samples,
+        to_date_test=to_date_test
     )
 
 
@@ -120,7 +129,6 @@ if __name__ == '__main__':
         normalize=True
     )
 
-
     # B - 20000 samples
     print("=== B - 20000 samples ===")
     truth_b, predict_b, accuracy_b = predict('B', n_samples=20000)
@@ -134,5 +142,54 @@ if __name__ == '__main__':
         normalize=True
     )
 
+    # A - Train su 4 giorni
+    print("=== A - Train 4 giorni ===")
+    truth_a, predict_a, accuracy_a = predict('A', days=10, days_test=3)
+    print(sklearn.metrics.classification_report(truth_a, predict_a))
+    conf_mat_a = sklearn.metrics.confusion_matrix(truth_a, predict_a)
+
+    plt.figure(7)
+    plot_confusion_matrix(
+        conf_mat_a,
+        list(map(str, range(max(truth_a)))),
+        normalize=True
+    )
+
+    print("=== A - Train 4 giorni ===")
+    truth_a, predict_a, accuracy_a = predict('A', days=10, days_test=10)
+    print(sklearn.metrics.classification_report(truth_a, predict_a))
+    conf_mat_a = sklearn.metrics.confusion_matrix(truth_a, predict_a)
+
+    plt.figure(8)
+    plot_confusion_matrix(
+        conf_mat_a,
+        list(map(str, range(max(truth_a)))),
+        normalize=True
+    )
+
+    # B - Train su 4 giorni
+    print("=== B - Train 4 giorni, Test 3 giorni ===")
+    truth_b, predict_b, accuracy_b = predict('B', days=3)
+    print(sklearn.metrics.classification_report(truth_b, predict_b))
+    conf_mat_b = sklearn.metrics.confusion_matrix(truth_b, predict_b)
+
+    plt.figure(9)
+    plot_confusion_matrix(
+        conf_mat_b,
+        list(map(str, range(max(truth_b)))),
+        normalize=True
+    )
+
+    print("=== B - Train 4 giorni, Test 17 giorni ===")
+    truth_b, predict_b, accuracy_b = predict('B', days=17)
+    print(sklearn.metrics.classification_report(truth_b, predict_b))
+    conf_mat_b = sklearn.metrics.confusion_matrix(truth_b, predict_b)
+
+    plt.figure(10)
+    plot_confusion_matrix(
+        conf_mat_b,
+        list(map(str, range(max(truth_b)))),
+        normalize=True
+    )
 
     plt.show()

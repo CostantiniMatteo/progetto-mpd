@@ -137,3 +137,4 @@ dataset_csv/
 *.synctex.gz
 *.toc
 *.r
+*.dvi

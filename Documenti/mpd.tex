@@ -211,7 +211,31 @@
 	
 	\section{Sperimentazione}
 	
-	\subsection{Misure di qualità dei risultati}
+	\subsection{Scelta del training}
+		
+	Per la suddivisione delle attività e dei sensori è stato scelto un time slice di 60 secondi. Questa scelta è un compromesso che permette di rilevare sia eventi particolarmente lunghi che eventi di durata minore e permette di avere dei buoni risultati.
+	
+	Una prima precisazione riguarda la scelta dei giorni da utilizzare come trainset e come testset: trattandosi di serie temporali non è possibile scegliere gli eventi in modo casuale in quanto spezzerebbero la dipendenza tra due attività consecutive. Per questo motivo è stato deciso di utilizzare i primi giorni del dataset come trainset e la parte finale come testset.	
+	Per quanto riguarda il momento esatto in cui è stato deciso di effettuare la suddivisione tra trainset e testset è stato scelto di "tagliare" la serie temporale a cavallo di due giorni e non secondo una percentuale fissata in modo da non interferire con la routine giornaliera e non interrompere attività in maniera irregolare.
+	
+	Dopo questa scelta è stata effettuata una prima analisi per valutare le prestazioni dell'HMM al variare della dimensione del trainset. In figura \ref{fig:traintestrate} viene mostrata l'accuracy ottenuta sia per il dataset A che per il dataset B in funzione del numero di giorni utilizzati come trainset.
+	Come si può vedere sono sufficienti pochi giorni per raggiungere una buona accuracy. Questo è dovuto al fatto che molto probabilmente le giornate si ripetono con una routine particolarmente definita e bastano quindi pochi giorni di osservazioni affinché il modello riesca a prevedere con buona precisione una sequenza di stati.
+	
+	Fatta questa osservazione è stato deciso di utilizzare come trainset i primi cinque giorni in quanto, come si può vedere, l'andamento della curva si è stabilizzato dopo il primo picco iniziale presente in corrispondenza del terzo e del quarto giorno. 
+	
+	\begin{figure}
+	\includegraphics[width=\linewidth]{immagini/traintestrate.png}
+	\caption{Accuracy in funzione del numero di giorni utilizzati come trainset. In blu è riportata l'accuracy del dataset A, in arancione quella del dataset B}
+	\label{fig:traintestrate}
+	\end{figure}
+	
+	% Timeslice da 60
+	% In un caso abbiamo suddiviso in dataset nell'altro no
+	
+	\subsection{Analisi dei risultati}
+	
+	
+	\subsubsection{Misure di qualità utilizzate}
 	
 	L'esecuzione dell'algoritmo di Viterbi su una sequenza di osservazioni, ha permesso di generare una sequenza di stati nascosti che, con una maggiore probabilità, ha portato alla realizzazione delle osservazioni date come input all'algoritmo.
 	
@@ -253,6 +277,20 @@
 		$ F-Measure = 2 * \dfrac{Precision * Recall}{Precision + Recall} $
 	\end{center}
 	
+	
+	
+	\subsubsection{Capacità predittiva del modello}
+	
+	% Abbiamo suddiviso testset e trainset
+	% Abbiamo predetto sul testset
+	
+	\subsubsection{Predizione a lungo termine}
+	
+	% Abbiamo generato a cazzo
+	% Abbiamo predetto
+	
+	
+	\section{GUI}
 	
 	\section{Conclusioni}
 \end{document}

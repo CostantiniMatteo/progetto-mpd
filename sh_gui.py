@@ -9,6 +9,10 @@ class Ui_Dialog(object):
         self.samples_spin.setEnabled(not self.samples_spin.isEnabled())
         self.nsamples_label.setEnabled(not self.nsamples_label.isEnabled())
 
+    def toggle_dataset(self):
+        self.max_days = 11 if self.max_days == 18 else 18
+        self.days_spin.setMaximum(self.max_days)
+
     @QtCore.pyqtSlot()
     def do_process(self):
         timeslice = self.slice_spinbox.value()
@@ -162,6 +166,7 @@ class Ui_Dialog(object):
         self.b_radio.setGeometry(QtCore.QRect(10, 60, 41, 20))
         self.b_radio.setLayoutDirection(QtCore.Qt.RightToLeft)
         self.b_radio.setObjectName("b_radio")
+        self.a_radio.toggled.connect(lambda x: self.toggle_dataset())
 
         # Mode
         self.mode_groupbox = QtWidgets.QGroupBox(self.hmm_groupbox)
@@ -217,6 +222,7 @@ class Ui_Dialog(object):
         self.days_label.setObjectName("days_label")
         self.days_label.setEnabled(False)
 
+        self.max_days = 11
         self.days_spin = QtWidgets.QSpinBox(self.mode_groupbox)
         self.days_spin.setGeometry(QtCore.QRect(250, 61, 81, 26))
         font = QtGui.QFont()
@@ -224,7 +230,7 @@ class Ui_Dialog(object):
         font.setWeight(50)
         self.days_spin.setFont(font)
         self.days_spin.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
-        self.days_spin.setMaximum(4)
+        self.days_spin.setMaximum(self.max_days)
         self.days_spin.setMinimum(1)
         self.days_spin.setProperty("value", 1)
         self.days_spin.setObjectName("days_spin")

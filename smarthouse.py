@@ -118,7 +118,7 @@ def random_sample(P, T, O, n):
 
 
 def main(train_rate=0.75, to_date=None, n_samples=None,
-         length=None, datasets=['A', 'B']):
+         length=None, datasets=['A', 'B'], to_date_test=None):
     truths = []; predicts = []; accs = []
     for f in datasets:
         if length:
@@ -138,9 +138,12 @@ def main(train_rate=0.75, to_date=None, n_samples=None,
         if to_date:
             slice_at = to_date[f]
             trainset = df[df['timestamp'] < slice_at]
-            testset = df[df['timestamp'] >= slice_at]
             trainset_s = trainset['activity']
             trainset_o = trainset['sensors']
+
+            testset = df[df['timestamp'] >= slice_at]
+            if to_date_test:
+                testset =  testset[testset['timestamp'] < to_date_test[f]]
             testset_s = testset['activity'].tolist()
             testset_o = testset['sensors'].tolist()
             size = trainset.shape[0]
@@ -173,7 +176,7 @@ def main(train_rate=0.75, to_date=None, n_samples=None,
         for i, j in zip(seq, testset_s):
             if i == j:
                 c += 1
-        print(f"Dataset {f}, trainset: {size}: {c/len(seq):.3f}")
+        print(f"Dataset {f}, train={size}, test={len(seq)}: {c/len(seq):.3f}")
         print("Likelihood:", p)
         # print(seq)
         accuracy = c/len(seq)
