@@ -86,13 +86,7 @@ def merge_dataset(
     return result
 
 
-def main(
-    length=60,
-    on_att="id",
-    use_day_period=False,
-    save_in_sliced=False,
-    on_update=None,
-):
+def main(**kwargs):
     if not os.path.exists("../dataset_csv"):
         os.makedirs("../dataset_csv")
     files = [
@@ -102,9 +96,9 @@ def main(
         "OrdonezB_Sensors",
     ]
 
-    # Lettura dei file txt con attività e sensori e conversione in csv
     dfs = {}
     for f in files:
+        # Lettura dei file txt con attività e sensori e conversione in csv
         df = txt_to_csv(f"../dataset/{f}.txt")
         df.sort_values(by=["end_time"], inplace=True)
         if f.find("ADL") == -1:
@@ -135,29 +129,13 @@ def main(
         # durante l'attività del sensore.pa
         start_date = "2011-11-28 00:00:00" if f == 0 else "2012-11-11 00:00:00"
         end_date = "2011-12-11 23:59:59" if f == 0 else "2012-12-02 23:59:59"
-        merged = merge_dataset(
-            adl,
-            obs,
-            start_date,
-            end_date,
-            length=length,
-            on_att=on_att,
-            user_day_period=use_day_period,
-            on_update=on_update,
-        )
+        merged = merge_dataset(adl, obs, start_date, end_date, **kwargs)
 
-        if save_in_sliced:
-            merged.to_csv(
-                f'../dataset_csv/sliced/Ordonez{"A" if f == 0 else "B"}_{length}.csv',
-                sep=",",
-                index=False,
-            )
-        else:
-            merged.to_csv(
-                f'../dataset_csv/Ordonez{"A" if f == 0 else "B"}.csv',
-                sep=",",
-                index=False,
-            )
+        merged.to_csv(
+            f'../dataset_csv/Ordonez{"A" if f == 0 else "B"}.csv',
+            sep=",",
+            index=False,
+        )
 
 
 if __name__ == "__main__":
