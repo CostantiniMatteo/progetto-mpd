@@ -27,7 +27,7 @@ def merge_dataset(
     length=60,
     on_update=None,
     on_att="id",
-    user_day_period=False,
+    use_day_period=False,
 ):
     first_minute = date_to_timestamp(start_date)
     last_minute = date_to_timestamp(end_date)
@@ -65,7 +65,7 @@ def merge_dataset(
 
         # Calcola il periodo della giornata
         period = day_period(s)
-        if user_day_period:
+        if use_day_period:
             active_sensors = active_sensors + str(period)
 
         timestamps.append(s)

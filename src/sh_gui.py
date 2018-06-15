@@ -63,12 +63,12 @@ class Ui_Dialog(object):
         parameters = {}
         parameters["length"] = self.slice_spinbox.value()
         parameters["use_day_period"] = self.period_checkbox.isChecked()
-        parameters["onupdate"] = update_progress_bar
+        parameters["on_update"] = update_progress_bar
         parameters["on_att"] = "id"
-        if location_only:
+        if self.location_checkbox.isChecked():
             parameters["on_att"] = "location"
-        if place_only:
-            paramenters["on_att"] = "place"
+        if self.place_checkbox.isChecked():
+            parameters["on_att"] = "place"
 
         self.run_button.setEnabled(False)
         self.process_progress1.setValue(0)
