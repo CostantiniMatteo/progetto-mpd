@@ -56,7 +56,7 @@ class Ui_Dialog(object):
 
         sample, predicted, accuracy = smarthouse.main(to_date=to_date, n_samples=n_samples, datasets=datasets)
 
-        analysis.plot_classification_report(sample, predicted, figsize=(5,5))
+        analysis.plot_classification_report_2(sample, predicted)
         plt.figure(2)
         analysis.plot_confusion_matrix(confusion_matrix(sample, predicted), list(map(str, range(max(sample) + 1))))
 
