@@ -186,7 +186,7 @@ def load_dataset(name, use_day_period=False, mapping=False):
 
 
 def smarthouse(
-    datasets=["A", "B"],
+    dataset=["A", "B"],
     train_days=5,
     train_offset=0,
     test_days=None,
@@ -194,13 +194,13 @@ def smarthouse(
     use_day_period=False,
     n_samples=None,
 ):
-    if not (type(datasets) == tuple or type(datasets) == list):
-        datasets = [datasets]
+    if not (type(dataset) == tuple or type(dataset) == list):
+        dataset = [dataset]
 
     truths = []
     predicts = []
     accs = []
-    for f in datasets:
+    for f in dataset:
         df = load_dataset(f, use_day_period=use_day_period)
 
         train_s, train_o, test_s, test_o = trainset_testset(
