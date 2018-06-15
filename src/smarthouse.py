@@ -9,6 +9,8 @@ np.set_printoptions(suppress=True)
 np.set_printoptions(precision=3)
 
 
+# Divide il dataframe in training set e test set. Se tutto il dataset
+# viene utilizzato per il training set, il test set restituito sarà vuoto
 def trainset_testset(
     df,
     state="activity",
@@ -37,6 +39,7 @@ def trainset_testset(
     return trainset[state], trainset[obs], testset[state], testset[obs]
 
 
+# Separa il dataset in training set e test set e esegue l'algoritmo di viterbi
 def smarthouse(
     dataset=["A", "B"],
     train_days=5,
@@ -92,5 +95,3 @@ def smarthouse(
 
 if __name__ == "__main__":
     t, p, a = smarthouse()
-    for i in range(len(a)):
-        print(f"{a[i]:.3f}")

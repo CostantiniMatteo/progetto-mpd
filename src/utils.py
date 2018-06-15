@@ -4,14 +4,16 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import itertools
+import sys
 
 
 # --- Varie ---
+# Converte una data in formato YYYY-mm-dd HH:MM:SS in timestamp
 def date_to_timestamp(m):
     return int(datetime.strptime(m.strip(), "%Y-%m-%d %H:%M:%S").timestamp())
 
 
-# Suddivide la giornata in 4 slice
+# Suddivide la giornata in 4 slice [0, 6) [6, 12) [12, 18) [18 24)
 # Restituisce la frazione del giorno a cui appartiene il timestamp
 def day_period(timestamp):
     h = (timestamp // (60 * 60)) % 24
@@ -26,12 +28,13 @@ def day_period(timestamp):
 
 
 def print_numpy_matrix(m):
-    import sys
-
     np.savetxt(sys.stdout, m, "%6.4f")
 
 
 # --- Dataset ---
+# Carica il dataset finale. name = {'A', 'B'}
+# Se mapping=True viene restituito anche il dizionario che associa
+# ogni sensore all'intero che lo rappresenta
 def load_dataset(name, use_day_period=False, mapping=False):
     df = pd.read_csv(
         f"../dataset_csv/Ordonez{name}.csv", converters={"sensors": str}

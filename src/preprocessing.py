@@ -86,6 +86,8 @@ def merge_dataset(
     return result
 
 
+# Unisce i dataset delle attività e dei sensori e li trasforma nei csv
+# che verranno utilizzati per definire l'HMM
 def preprocess(**kwargs):
     if not os.path.exists("../dataset_csv"):
         os.makedirs("../dataset_csv")

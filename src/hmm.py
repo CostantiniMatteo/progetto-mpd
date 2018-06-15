@@ -61,6 +61,7 @@ def random_sample(P, T, O, n):
     return states, obs
 
 
+# Stima i parametri per l'HMM a partire dalle sequenze di stati e osservazioni
 def hmm(state_seq, obs_seq, n=None, m=None):
     if n is None:
         n = max(state_seq) + 1
@@ -75,21 +76,6 @@ def hmm(state_seq, obs_seq, n=None, m=None):
 
 
 def viterbi(initial, transition, emission, events):
-    """Find the likeliest path in a hidden Markov Model resulting in the
-    given events.
-
-    Arguments:
-    initial: arraylike(n) --- probability of starting in each state
-    transition: arraylike(n, n) -- probability of transition between states
-    emission: arraylike(n, e) -- probability of emitting each event in
-        each state
-    events -- iterable of events
-
-    Returns:
-    path: list(int) -- list of states in the most probable path
-    p: float -- log-likelihood of that path
-
-    """
     # Use log-likelihoods to avoid floating-point underflow. Note that
     # we want -inf for the log of zero, so suppress warnings here.
     with np.errstate(divide="ignore"):
