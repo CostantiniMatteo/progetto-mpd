@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def probability_distribution(seq1, seq2, n=None, m=None):
     if n is None:
         n = 1 + max(seq1)
