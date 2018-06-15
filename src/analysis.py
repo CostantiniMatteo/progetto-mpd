@@ -11,7 +11,7 @@ def predict(**kwargs):
     conf_mat = sklearn.metrics.confusion_matrix(truth, predict)
 
     plot_confusion_matrix(
-        conf_mat, list(map(str, range(max(truth)))), normalize=True
+        truth, predict, list(map(str, range(max(truth)))), normalize=True
     )
 
 

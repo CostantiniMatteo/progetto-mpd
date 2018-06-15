@@ -1,4 +1,5 @@
 from datetime import datetime
+import sklearn.metrics
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
@@ -52,8 +53,9 @@ def load_dataset(name, use_day_period=False, mapping=False):
 
 # --- Plotting ---
 def plot_confusion_matrix(
-    cm, classes, normalize=False, title="Confusion matrix", cmap=plt.cm.Blues
+    t, p, classes, normalize=False, title="Confusion matrix", cmap=plt.cm.Blues
 ):
+    cm = sklearn.metrics.confusion_matrix(t, p)
     if normalize:
         cm = cm.astype("float") / cm.sum(axis=1)[:, np.newaxis]
 

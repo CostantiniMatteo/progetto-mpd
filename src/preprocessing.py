@@ -86,7 +86,7 @@ def merge_dataset(
     return result
 
 
-def main(**kwargs):
+def preprocess(**kwargs):
     if not os.path.exists("../dataset_csv"):
         os.makedirs("../dataset_csv")
     files = [
@@ -139,4 +139,4 @@ def main(**kwargs):
 
 
 if __name__ == "__main__":
-    main(length=3000)
+    preprocess(length=60)
