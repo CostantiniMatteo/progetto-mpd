@@ -1,19 +1,56 @@
-from smarthouse import smarthouse
+from datetime import datetime
+import matplotlib.pyplot as plt
+import pandas as pd
 import numpy as np
 import itertools
-import sklearn.metrics
-from sklearn.metrics import precision_recall_fscore_support
-import matplotlib.pyplot as plt
 
 
+# --- Varie ---
+def date_to_timestamp(m):
+    return int(datetime.strptime(m.strip(), "%Y-%m-%d %H:%M:%S").timestamp())
+
+
+# Suddivide la giornata in 4 slice
+# Restituisce la frazione del giorno a cui appartiene il timestamp
+def day_period(timestamp):
+    h = ((timestamp // (60*60)) % 24)
+    if h < 6: return 0
+    elif h < 12: return 1
+    elif h < 18: return 2
+    else: return 3
+
+
+def print_numpy_matrix(m):
+    import sys
+
+    np.savetxt(sys.stdout, m, "%6.4f")
+
+
+# --- Dataset ---
+def load_dataset(name, use_day_period=False, mapping=False):
+    df = pd.read_csv(
+        f"../dataset_csv/Ordonez{name}.csv", converters={"sensors": str}
+    )
+
+    # Discretizza le osservazioni dei sensori
+    if use_day_period:
+        df["sensors"] = df["sensors"] + df["period"].apply(str)
+
+    df[["sensors"]] = df[["sensors"]].apply(lambda x: x.astype("category"))
+    m = dict(enumerate(df["sensors"].cat.categories))
+    df[["sensors"]] = df[["sensors"]].apply(lambda x: x.cat.codes)
+
+    if mapping:
+        return df, m
+
+    return df
+
+
+# --- Plotting ---
 def plot_confusion_matrix(cm, classes,
                           normalize=False,
                           title='Confusion matrix',
                           cmap=plt.cm.Blues):
-    """
-    This function prints and plots the confusion matrix.
-    Normalization can be applied by setting `normalize=True`.
-    """
     if normalize:
         cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
 
@@ -37,11 +74,6 @@ def plot_confusion_matrix(cm, classes,
 
 
 def show_values(pc, fmt="%.2f", **kw):
-    '''
-    Heatmap with text in each cell with matplotlib's pyplot
-    Source: https://stackoverflow.com/a/25074150/395857
-    By HYRY
-    '''
     pc.update_scalarmappable()
     ax = pc.axes
     it = zip(pc.get_paths(), pc.get_facecolors(), pc.get_array())
@@ -55,11 +87,6 @@ def show_values(pc, fmt="%.2f", **kw):
 
 
 def cm2inch(*tupl):
-    '''
-    Specify figure size in centimeter in matplotlib
-    Source: https://stackoverflow.com/a/22787457/395857
-    By gns-ank
-    '''
     inch = 2.54
     if type(tupl[0]) == tuple:
         return tuple(i/inch for i in tupl[0])
@@ -71,12 +98,6 @@ def heatmap(AUC, title, xlabel, ylabel,
             xticklabels, yticklabels,
             figure_width=40, figure_height=20,
             correct_orientation=False, cmap='RdBu'):
-    '''
-    Inspired by:
-    - https://stackoverflow.com/a/16124677/395857
-    - https://stackoverflow.com/a/25074150/395857
-    '''
-
     # Plot it out
     fig, ax = plt.subplots()
     c = ax.pcolor(AUC, edgecolors='k', linestyle= 'dashed',
@@ -123,12 +144,8 @@ def heatmap(AUC, title, xlabel, ylabel,
     fig.set_size_inches(cm2inch(figure_width, figure_height))
 
 
-def plot_classification_report_2(truth, predict,
+def plot_classification_report(truth, predict,
         title='Classification report ', cmap='RdBu'):
-    '''
-    Plot scikit-learn classification report.
-    Extension based on https://stackoverflow.com/a/31689645/395857
-    '''
     classification_report = sklearn.metrics.classification_report(truth, predict)
     lines = classification_report.split('\n')
 
@@ -146,9 +163,6 @@ def plot_classification_report_2(truth, predict,
         print(v)
         plotMat.append(v)
 
-    print('plotMat: {0}'.format(plotMat))
-    print('support: {0}'.format(support))
-
     xlabel = 'Metrics'
     ylabel = 'Classes'
     xticklabels = ['Precision', 'Recall', 'F1-score']
@@ -161,58 +175,3 @@ def plot_classification_report_2(truth, predict,
             yticklabels, figure_width, figure_height,
             correct_orientation, cmap=cmap)
 
-
-def predict(**kwargs):
-    truth, predict, accuracy = smarthouse(**kwargs)
-    print(sklearn.metrics.classification_report(truth, predict))
-    conf_mat = sklearn.metrics.confusion_matrix(truth, predict)
-
-    plot_confusion_matrix(
-        conf_mat,
-        list(map(str, range(max(truth)))),
-        normalize=True
-    )
-
-
-if __name__ == '__main__':
-    np.set_printoptions(precision=2)
-
-    # A - 3000 samples
-    print("=== A - 3000 samples ===")
-    plt.figure(1)
-    predict(dataset='A', n_samples=3000)
-
-    # A - 20000 samples
-    print("=== A - 20000 samples ===")
-    plt.figure(2)
-    predict(dataset='A', n_samples=20000)
-
-    # B - 3000 samples
-    print("=== B - 3000 samples ===")
-    plt.figure(3)
-    predict(dataset='B', n_samples=3000)
-
-    # B - 20000 samples
-    print("=== B - 20000 samples ===")
-    plt.figure(4)
-    predict(dataset='B', n_samples=20000)
-
-    # A - Train su 4 giorni
-    print("=== A - Train 5 giorni, Test 3 giorni ===")
-    plt.figure(5)
-    predict(dataset='A', test_days=3)
-
-    print("=== A - Train 5 giorni, Test 9 giorni ===")
-    plt.figure(6)
-    predict(dataset='A', test_days=9)
-
-    # B - Train su 4 giorni
-    print("=== B - Train 5 giorni, Test 3 giorni ===")
-    plt.figure(7)
-    predict(dataset='B', test_days=3)
-
-    print("=== B - Train 5 giorni, Test 16 giorni ===")
-    plt.figure(8)
-    predict(dataset='B', test_days=16)
-
-    plt.show()

@@ -1,12 +1,11 @@
-import io, os
-import pandas as pd
-import numpy as np
-from datetime import datetime
+from utils import date_to_timestamp, day_period
 from tqdm import tqdm
-
+import pandas as pd
+import os
 
 # Per stampare le colonne del dataframe senza che vada a capo
 pd.set_option('display.expand_frame_repr', False)
+
 
 # Legge il txt e lo converte in csv trasformando le date in timestamp
 def txt_to_csv(path):
@@ -17,26 +16,6 @@ def txt_to_csv(path):
     df['end_time'] = df['end_time'].apply(date_to_timestamp)
 
     return df
-
-
-# Parsa la data
-def date_to_timestamp(m):
-    return int(datetime.strptime(m.strip(), "%Y-%m-%d %H:%M:%S").timestamp())
-
-
-# Restituisce il minuto del giorno
-def day_minute(timestamp):
-    return ((timestamp // 60) % (24*60))
-
-
-# Suddivide la giornata in 4 slice
-# Restituisce la frazione del giorno a cui appartiene il timestamp
-def day_period(timestamp):
-    h = ((timestamp // (60*60)) % 24)
-    if h < 6: return 0
-    elif h < 12: return 1
-    elif h < 18: return 2
-    else: return 3
 
 
 # Discretizza il tempo e unisce i due dataset di attività ed osservazioni
@@ -97,7 +76,7 @@ def merge_dataset(adl, obs, start_date, end_date, length=60,
 
 def main(length=60, on_att='id', use_day_period=False,
          save_in_sliced=False, on_update=None):
-    if not os.path.exists('dataset_csv'): os.makedirs('dataset_csv')
+    if not os.path.exists('../dataset_csv'): os.makedirs('../dataset_csv')
     files = [
         'OrdonezA_ADLs',
         'OrdonezA_Sensors',
@@ -108,7 +87,7 @@ def main(length=60, on_att='id', use_day_period=False,
     # Lettura dei file txt con attività e sensori e conversione in csv
     dfs = {}
     for f in files:
-        df = txt_to_csv(f'dataset/{f}.txt')
+        df = txt_to_csv(f'../dataset/{f}.txt')
         df.sort_values(by=['end_time'], inplace=True)
         if f.find('ADL') == -1:
             df['id'] = df['location'] + df['place'] + df['type']
@@ -123,7 +102,7 @@ def main(length=60, on_att='id', use_day_period=False,
         df[cols] = df[cols].apply(lambda x: x.cat.codes)
 
         # Salva il csv. Just in case
-        df.to_csv(f'dataset_csv/{f}.csv', index=False)
+        df.to_csv(f'../dataset_csv/{f}.csv', index=False)
         df.reset_index(inplace=True)
         dfs[f] = df
 
@@ -141,17 +120,17 @@ def main(length=60, on_att='id', use_day_period=False,
 
         if save_in_sliced:
             merged.to_csv(
-                f'dataset_csv/sliced/Ordonez{"A" if f == 0 else "B"}_{length}.csv',
+                f'../dataset_csv/sliced/Ordonez{"A" if f == 0 else "B"}_{length}.csv',
                 sep=',',
                 index=False,
             )
         else:
             merged.to_csv(
-                f'dataset_csv/Ordonez{"A" if f == 0 else "B"}.csv',
+                f'../dataset_csv/Ordonez{"A" if f == 0 else "B"}.csv',
                 sep=',',
                 index=False,
             )
 
 
 if __name__ == '__main__':
-    main()
+    main(length=3000)
