@@ -1,6 +1,10 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
+import matplotlib.pyplot as plt
+from sklearn.metrics import confusion_matrix
 import preprocessing
 import smarthouse
+import analysis
+
 
 class Ui_Dialog(object):
     def toggle_mode(self):
@@ -51,6 +55,11 @@ class Ui_Dialog(object):
         n_samples = 0 if not self.sampling_radio.isChecked() else self.samples_spin.value()
 
         sample, predicted, accuracy = smarthouse.main(to_date=to_date, n_samples=n_samples, datasets=datasets)
+
+        plt.figure(1)
+        analysis.plot_confusion_matrix(confusion_matrix(sample, predicted), list(map(str, range(max(sample) + 1))))
+        plt.show()
+
         sample = list(map(lambda v: f'&nbsp;&nbsp;{v}' if v < 10 else str(v), sample))
         predicted = list(map(lambda v: f'&nbsp;&nbsp;{v}' if v < 10 else str(v), predicted))
 
@@ -70,6 +79,10 @@ class Ui_Dialog(object):
         self.accuracy_value_label.setText(f'{accuracy*100:.3f}')
         self.sample_textbrowser.setText('&nbsp;&nbsp;&nbsp;&nbsp;' + sample_text)
         self.predicted_textbrowser.setText('&nbsp;&nbsp;&nbsp;&nbsp;' + predicted_text)
+
+
+
+
 
 
     def setupUi(self, Dialog):
