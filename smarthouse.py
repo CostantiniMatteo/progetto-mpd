@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from functools import reduce
 from datetime import datetime
 
 
@@ -27,10 +28,11 @@ def probability_distribution(seq1, seq2, n=None, m=None):
 
 
 # Calcola la distribuzione di probabilità degli stati
-def prior(transitions):
+def prior(transitions, n=None):
+    if n is None: n = max(transitions) + 1
     g = transitions.groupby(transitions)
     result = g.count()/g.count().sum()
-    return result.reindex(range(max(transitions)+1)).fillna(0).as_matrix()
+    return result.reindex(range(n)).fillna(0).as_matrix()
 
 
 # Calcola la matrice di transizione data la sequenza di stati ad ogni tempo t
@@ -117,67 +119,83 @@ def random_sample(P, T, O, n):
     return states, obs
 
 
-def main(train_rate=0.75, to_date=None, n_samples=None,
-         length=None, datasets=['A', 'B'], to_date_test=None):
+def hmm(state_seq, obs_seq, n=None, m=None):
+    if n is None: n = max(state_seq) + 1
+    if m is None: m = max(obs_seq) + 1
+
+    P = prior(state_seq, n=n)
+    T = transition_matrix(state_seq, n=n, m=n)
+    O = obs_matrix(state_seq, obs_seq, n=n, m=m)
+
+    return P, T, O
+
+
+def trainset_testset(df, state='activity', obs='sensors',
+        train_days=None, train_offset=0, test_days=None, test_offset=0):
+    daylen = 24 * 60 * 60
+    start = df.iloc[0]['timestamp']; end = df.iloc[-1]['timestamp'] + 60
+
+    start_train = start + train_offset * daylen
+    end_train = end if train_days is None else start_train + train_days * daylen
+    start_test = end_train + test_offset * daylen
+    end_test = end if test_days is None else start_test + test_days * daylen + 60
+
+    trainset = df[(df['timestamp'] >= start_train) & (df['timestamp'] < end_train)]
+    testset = df[(df['timestamp'] >= start_test) & (df['timestamp'] < end_test)]
+
+    return trainset[state], trainset[obs], testset[state], testset[obs]
+
+
+def load_dataset(name, use_day_period=False, mapping=False):
+    df = pd.read_csv(
+        f'dataset_csv/Ordonez{name}.csv',
+        converters={'sensors': str}
+    )
+
+    # Discretizza le osservazioni dei sensori
+    if use_day_period:
+        df['sensors'] = df['sensors'] + df['period'].apply(str)
+
+    df[['sensors']] = df[['sensors']].apply(lambda x: x.astype('category'))
+    m = dict(enumerate(df['sensors'].cat.categories))
+    df[['sensors']] = df[['sensors']].apply(lambda x: x.cat.codes)
+
+    if mapping:
+        return df, m
+
+    return df
+
+
+def smarthouse(datasets=['A', 'B'], train_days=5, train_offset=0,
+        test_days=None, test_offset=0, use_day_period=False, n_samples=None):
+
+    if not (type(datasets) == tuple or type(datasets) == list):
+        datasets = [datasets]
+
     truths = []; predicts = []; accs = []
     for f in datasets:
-        if length:
-            df = pd.read_csv(f'dataset_csv/sliced/Ordonez{f}_{length}.csv',
-                converters={'sensors': str})
-        else:
-            df = pd.read_csv(f'dataset_csv/Ordonez{f}.csv',
-            converters={'sensors': str})
+        df = load_dataset(f, use_day_period=use_day_period)
 
-        # Discretizza le osservazioni dei sensori
-        df[['sensors']] = df[['sensors']].apply(lambda x: x.astype('category'))
-        mapping = dict(enumerate(df['sensors'].cat.categories))
-        df[['sensors']] = df[['sensors']].apply(lambda x: x.cat.codes)
-
-        # Divisione in testset e trainset
-        if to_date:
-            slice_at = to_date[f]
-            trainset = df[df['timestamp'] < slice_at]
-            trainset_s = trainset['activity']
-            trainset_o = trainset['sensors']
-
-            testset = df[df['timestamp'] >= slice_at]
-            if to_date_test:
-                testset =  testset[testset['timestamp'] < to_date_test[f]]
-            testset_s = testset['activity'].tolist()
-            testset_o = testset['sensors'].tolist()
-            size = trainset.shape[0]
-        else:
-            size = int(df.shape[0] * train_rate)
-            trainset_s = df['activity'][:size]
-            trainset_o = df['sensors'][:size]
-            testset_s = df['activity'].tolist()[size:]
-            testset_o = df['sensors'].tolist()[size:]
-            print(f"Trainset: {trainset_s.shape[0]/df.shape[0]:.3f}")
+        train_s, train_o, test_s, test_o = trainset_testset(
+            df, train_days=train_days, train_offset=train_offset,
+            test_days=test_days, test_offset=test_offset
+        )
 
         # Calcolo delle distribuzioni della HMM
-        P = prior(trainset_s)
-        T = transition_matrix(trainset_s,
-            n=max(df['activity']) + 1, m=max(df['activity']) + 1)
-        O = obs_matrix(trainset_s, trainset_o,
-            n=max(df['activity']) + 1, m=max(df['sensors']) + 1)
+        P, T, O = hmm(train_s, train_o)
 
         if n_samples:
-            testset_s, testset_o = random_sample(P, T, O, n_samples)
+            test_s, test_o = random_sample(P, T, O, n_samples)
 
         # Esegue l'algoritmo di Viterbi sul testset e calcola
         # calcola la percentuale di stati predetti correttamente
-        seq, p = viterbi(P, T, O, testset_o)
-        c = 0
-        for i, j in zip(seq, testset_s):
-            if i == j:
-                c += 1
-        print(f"Dataset {f}, train={size}, test={len(seq)}: {c/len(seq):.3f}")
-        print("Likelihood:", p)
+        predicted, p = viterbi(P, T, O, test_o)
+        accuracy = reduce(lambda i, j: i + (1 if j[0] == j[1] else 0),
+            zip(test_s, predicted), 0) / len(predicted)
 
-        accuracy = c/len(seq)
         accs.append(accuracy)
-        truths.append(testset_s)
-        predicts.append(seq)
+        truths.append(test_s)
+        predicts.append(predicted)
 
     if len(accs) == 1:
         return truths[0], predicts[0], accs[0]
@@ -186,4 +204,6 @@ def main(train_rate=0.75, to_date=None, n_samples=None,
 
 
 if __name__ == '__main__':
-    main()
+    t, p, a = smarthouse()
+    for i in range(len(a)):
+        print(f'{a[i]:.3f}')
