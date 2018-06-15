@@ -64,7 +64,9 @@ def smarthouse(
         )
 
         # Calcolo delle distribuzioni della HMM
-        P, T, O = hmm(train_s, train_o)
+        n = max(df['activity'] + 1)
+        m = max(df['sensors'] + 1)
+        P, T, O = hmm(train_s, train_o, n=n, m=m)
 
         if n_samples:
             test_s, test_o = random_sample(P, T, O, n_samples)
