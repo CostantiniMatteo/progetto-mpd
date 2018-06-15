@@ -1,9 +1,8 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 import matplotlib.pyplot as plt
-from sklearn.metrics import confusion_matrix
-import preprocessing
-import smarthouse
-import analysis
+from preprocessing import preprocess
+from smarthouse import smarthouse
+from utils import plot_classification_report, plot_confusion_matrix
 
 
 class Ui_Dialog(object):
@@ -17,76 +16,90 @@ class Ui_Dialog(object):
         self.max_days = 13 if self.max_days == 20 else 20
         self.days_spin.setMaximum(self.max_days)
 
+    def format_sequences(self, sample, predicted):
+        sample = list(
+            map(lambda v: f"&nbsp;&nbsp;{v}" if v < 10 else str(v), sample)
+        )
+        predicted = list(
+            map(lambda v: f"&nbsp;&nbsp;{v}" if v < 10 else str(v), predicted)
+        )
+
+        for i in range(len(sample)):
+            if sample[i] == predicted[i]:
+                sample[i] = predicted[
+                    i
+                ] = f"<font face='mono' color='green'>&nbsp;{sample[i]}</font>"
+            else:
+                sample[
+                    i
+                ] = f"<font face='mono' color='red'>&nbsp;{sample[i]}</font>"
+                predicted[
+                    i
+                ] = f"<font face='mono' color='red'>&nbsp;{predicted[i]}</font>"
+
+        sample_rows = [
+            " ".join(sample[x : x + 5]) for x in range(0, len(sample), 5)
+        ]
+        sample_text = "<br>&nbsp;&nbsp;&nbsp;&nbsp;".join(sample_rows)
+        sample_text = "&nbsp;&nbsp;&nbsp;&nbsp;" + sample_text
+
+        predicted_rows = [
+            " ".join(predicted[x : x + 5]) for x in range(0, len(predicted), 5)
+        ]
+        predicted_text = "<br>&nbsp;&nbsp;&nbsp;&nbsp;".join(predicted_rows)
+        predicted_text = "&nbsp;&nbsp;&nbsp;&nbsp;" + predicted_text
+
+        return sample_text, predicted_text
+
     @QtCore.pyqtSlot()
     def do_process(self):
-        timeslice = self.slice_spinbox.value()
-        day_period = self.period_checkbox.isChecked()
-        location_only = self.location_checkbox.isChecked()
-        place_only = self.place_checkbox.isChecked()
-
-        if location_only and place_only:
-            raise ValueError("Both location and place only are checked. Only one can be checkecd.")
-        on_att = 'id'
-        if location_only: on_att = 'location'
-        if place_only: on_att = 'place'
-
         def update_progress_bar(value, bar):
-            if bar == 'A':
+            if bar == "A":
                 self.process_progress1.setValue(value)
             else:
                 self.process_progress2.setValue(value)
             QtWidgets.QApplication.processEvents()
 
+        parameters = {}
+        parameters["length"] = self.slice_spinbox.value()
+        parameters["use_day_period"] = self.period_checkbox.isChecked()
+        parameters["onupdate"] = update_progress_bar
+        parameters["on_att"] = "id"
+        if location_only:
+            parameters["on_att"] = "location"
+        if place_only:
+            paramenters["on_att"] = "place"
+
         self.run_button.setEnabled(False)
         self.process_progress1.setValue(0)
         self.process_progress2.setValue(0)
-        preprocessing.main(length=timeslice, on_att=on_att, use_day_period=day_period, on_update=update_progress_bar)
+        preprocess(**parameters)
         self.run_button.setEnabled(True)
 
-
     def do_viterbi(self):
-        datasets = ['A'] if self.a_radio.isChecked() else ['B']
-        to_date = None
+        parameters = {}
+        parameters["dataset"] = "A" if self.a_radio.isChecked() else "B"
         if self.split_radio.isChecked():
-            start_A = smarthouse.date_to_timestamp("2011-11-28 00:00:00")
-            start_B = smarthouse.date_to_timestamp("2012-11-11 00:00:00")
-            days = self.days_spin.value()
-            to_date = {'A': start_A + 86400*(14-days), 'B': start_B + 86400*(21 - days)}
-        n_samples = 0 if not self.sampling_radio.isChecked() else self.samples_spin.value()
+            parameters["test_days"] = self.days_spin.value()
 
-        sample, predicted, accuracy = smarthouse.main(to_date=to_date, n_samples=n_samples, datasets=datasets)
+        if self.sampling_radio.isChecked():
+            parameters["n_samples"] = self.samples_spin.value()
 
-        analysis.plot_classification_report(sample, predicted)
+        sample, predicted, accuracy = smarthouse(**parameters)
+
+        plot_classification_report(sample, predicted)
         plt.figure(2)
-        analysis.plot_confusion_matrix(confusion_matrix(sample, predicted), list(map(str, range(max(sample) + 1))))
+        plot_confusion_matrix(
+            sample, predicted, list(map(str, range(max(sample) + 1)))
+        )
+
+        sample_text, predicted_text = self.format_sequences(sample, predicted)
+
+        self.accuracy_value_label.setText(f"{accuracy*100:.3f}")
+        self.sample_textbrowser.setText(sample_text)
+        self.predicted_textbrowser.setText(predicted_text)
 
         plt.show()
-
-
-        sample = list(map(lambda v: f'&nbsp;&nbsp;{v}' if v < 10 else str(v), sample))
-        predicted = list(map(lambda v: f'&nbsp;&nbsp;{v}' if v < 10 else str(v), predicted))
-
-        for i in range(len(sample)):
-            if sample[i] == predicted[i]:
-                sample[i] = predicted[i] = f"<font face='mono' color='green'>&nbsp;{sample[i]}</font>"
-            else:
-                sample[i] = f"<font face='mono' color='red'>&nbsp;{sample[i]}</font>"
-                predicted[i] = f"<font face='mono' color='red'>&nbsp;{predicted[i]}</font>"
-
-        sample_rows = [" ".join(sample[x : x + 5]) for x in range(0, len(sample), 5)]
-        sample_text = "<br>&nbsp;&nbsp;&nbsp;&nbsp;".join(sample_rows)
-
-        predicted_rows = [" ".join(predicted[x : x + 5]) for x in range(0, len(predicted), 5)]
-        predicted_text = "<br>&nbsp;&nbsp;&nbsp;&nbsp;".join(predicted_rows)
-
-        self.accuracy_value_label.setText(f'{accuracy*100:.3f}')
-        self.sample_textbrowser.setText('&nbsp;&nbsp;&nbsp;&nbsp;' + sample_text)
-        self.predicted_textbrowser.setText('&nbsp;&nbsp;&nbsp;&nbsp;' + predicted_text)
-
-
-
-
-
 
     def setupUi(self, Dialog):
         Dialog.setObjectName("Dialog")
@@ -109,7 +122,11 @@ class Ui_Dialog(object):
         font.setBold(False)
         font.setWeight(50)
         self.slice_spinbox.setFont(font)
-        self.slice_spinbox.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.slice_spinbox.setAlignment(
+            QtCore.Qt.AlignRight
+            | QtCore.Qt.AlignTrailing
+            | QtCore.Qt.AlignVCenter
+        )
         self.slice_spinbox.setMaximum(10000)
         self.slice_spinbox.setProperty("value", 60)
         self.slice_spinbox.setObjectName("slice_spinbox")
@@ -154,9 +171,13 @@ class Ui_Dialog(object):
         self.place_checkbox.setObjectName("place_checkbox")
 
         # Progress Bar
-        self.process_progress1 = QtWidgets.QProgressBar(self.processing_groupbox)
+        self.process_progress1 = QtWidgets.QProgressBar(
+            self.processing_groupbox
+        )
         self.process_progress1.setGeometry(QtCore.QRect(340, 60, 113, 32))
-        self.process_progress2 = QtWidgets.QProgressBar(self.processing_groupbox)
+        self.process_progress2 = QtWidgets.QProgressBar(
+            self.processing_groupbox
+        )
         self.process_progress2.setGeometry(QtCore.QRect(340, 80, 113, 32))
 
         # Hidden Markov Model
@@ -216,7 +237,11 @@ class Ui_Dialog(object):
         font.setBold(False)
         font.setWeight(50)
         self.samples_spin.setFont(font)
-        self.samples_spin.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.samples_spin.setAlignment(
+            QtCore.Qt.AlignRight
+            | QtCore.Qt.AlignTrailing
+            | QtCore.Qt.AlignVCenter
+        )
         self.samples_spin.setMaximum(100000)
         self.samples_spin.setProperty("value", 3000)
         self.samples_spin.setObjectName("samples_spin")
@@ -225,7 +250,11 @@ class Ui_Dialog(object):
         font = QtGui.QFont()
         font.setPointSize(14)
         self.nsamples_label.setFont(font)
-        self.nsamples_label.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.nsamples_label.setAlignment(
+            QtCore.Qt.AlignRight
+            | QtCore.Qt.AlignTrailing
+            | QtCore.Qt.AlignVCenter
+        )
         self.nsamples_label.setObjectName("nsamples_label")
 
         # Days
@@ -234,7 +263,11 @@ class Ui_Dialog(object):
         font = QtGui.QFont()
         font.setPointSize(14)
         self.days_label.setFont(font)
-        self.days_label.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.days_label.setAlignment(
+            QtCore.Qt.AlignRight
+            | QtCore.Qt.AlignTrailing
+            | QtCore.Qt.AlignVCenter
+        )
         self.days_label.setObjectName("days_label")
         self.days_label.setEnabled(False)
 
@@ -245,7 +278,11 @@ class Ui_Dialog(object):
         font.setBold(False)
         font.setWeight(50)
         self.days_spin.setFont(font)
-        self.days_spin.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.days_spin.setAlignment(
+            QtCore.Qt.AlignRight
+            | QtCore.Qt.AlignTrailing
+            | QtCore.Qt.AlignVCenter
+        )
         self.days_spin.setMaximum(self.max_days)
         self.days_spin.setMinimum(1)
         self.days_spin.setProperty("value", 1)
@@ -280,9 +317,11 @@ class Ui_Dialog(object):
         self.sample_label.setObjectName("sample_label")
 
         # Predicted
-        self.predicted_textbrowser = QtWidgets.QTextBrowser(self.results_groupbox)
+        self.predicted_textbrowser = QtWidgets.QTextBrowser(
+            self.results_groupbox
+        )
         self.predicted_textbrowser.setGeometry(QtCore.QRect(240, 61, 201, 171))
-        self.predicted_textbrowser.setObjectName('predicted_textbrowser')
+        self.predicted_textbrowser.setObjectName("predicted_textbrowser")
         self.predicted_label = QtWidgets.QLabel(self.results_groupbox)
         self.predicted_label.setGeometry(QtCore.QRect(240, 35, 101, 21))
         font = QtGui.QFont()
@@ -302,17 +341,25 @@ class Ui_Dialog(object):
         font = QtGui.QFont()
         font.setPointSize(16)
         self.accuracy_value_label.setFont(font)
-        self.accuracy_value_label.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.accuracy_value_label.setAlignment(
+            QtCore.Qt.AlignRight
+            | QtCore.Qt.AlignTrailing
+            | QtCore.Qt.AlignVCenter
+        )
         self.accuracy_value_label.setObjectName("accuracy_value_label")
 
         self.sample_textbrowser.horizontalScrollBar().valueChanged.connect(
-            self.predicted_textbrowser.horizontalScrollBar().setValue)
+            self.predicted_textbrowser.horizontalScrollBar().setValue
+        )
         self.sample_textbrowser.verticalScrollBar().valueChanged.connect(
-            self.predicted_textbrowser.verticalScrollBar().setValue)
+            self.predicted_textbrowser.verticalScrollBar().setValue
+        )
         self.predicted_textbrowser.horizontalScrollBar().valueChanged.connect(
-            self.sample_textbrowser.horizontalScrollBar().setValue)
+            self.sample_textbrowser.horizontalScrollBar().setValue
+        )
         self.predicted_textbrowser.verticalScrollBar().valueChanged.connect(
-            self.sample_textbrowser.verticalScrollBar().setValue)
+            self.sample_textbrowser.verticalScrollBar().setValue
+        )
 
         self.retranslateUi(Dialog)
         QtCore.QMetaObject.connectSlotsByName(Dialog)

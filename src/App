@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 import matplotlib
-matplotlib.use('Qt4Agg')
+
+matplotlib.use("Qt4Agg")
 
 from sh_gui import Ui_Dialog
 from PyQt5 import QtWidgets
 import sys
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     app = QtWidgets.QApplication(sys.argv)
     dialog = QtWidgets.QDialog()
