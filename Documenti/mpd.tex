@@ -479,7 +479,7 @@
 
 	Nell'ultima coppia di test effettuati sono stati utilizzati, per allenare il modello, i primi cinque giorni contenuti nel dataset, sia per il test su A, sia per il test su B; inoltre, il modello è stato testato in entrambi i casi attraverso la sequenza di osservazioni generate a caso, contenenti 3000 minuti. Le matrici di confusione ottenute sono riportate in figura \ref{fig:a_3ks} per il dataset A e in figura \ref{fig:b_3ks} per il dataset b. Mentre in tabella \ref{tab:a_3ks} e \ref{tab:b_3ks} sono riportate le misure di Precision, Recall ed F-Measure rispettivamente per i dataset A e B.
 
-	In quest'ultimo esperimento sono stati ottenuti i migliori valori di accuracy, ovvero \textbf{accuracy di 0,968} per il dataset A e \textbf{accuracy di 0,967} per il dataset B.
+	In quest'ultimo esperimento sono stati ottenuti i migliori valori di accuracy, ovvero \textbf{accuracy di 0,968} per il dataset A e \textbf{accuracy di 0.914} per il dataset B.
 
 	Dalle tabelle \ref{tab:a_3ks} e \ref{tab:b_3ks} e dalle figure \ref{fig:a_3ks} e \ref{fig:b_3ks}, si possono notare gli stati che sono stati predetti con una maggiore accuratezza.
 
@@ -529,17 +529,16 @@
     	\begin{tabularx}{0.56\textwidth}{l | llll}
     		{} & {precision} & {recall} & {f1-score} & {support} \\
     		\midrule
-{0} & {0.98} & {0.91} & {0.95} & {68} \\
-{1} & {0.33} & {0.40} & {0.36} & {5} \\
-{2} & {0.61} & {0.65} & {0.63} & {17} \\
-{4} & {1.00} & {0.90} & {0.95} & {108} \\
-{5} & {0.89} & {0.89} & {0.89} & {18} \\
-{6} & {1.00} & {1.00} & {1.00} & {1370} \\
-{7} & {0.00} & {0.00} & {0.00} & {8} \\
-{8} & {0.99} & {0.98} & {0.98} & {751} \\
-{9} & {0.23} & {0.23} & {0.23} & {13} \\
-{10} & {0.93} & {0.95} & {0.94} & {642} \\
-{avg/total} & {0.97} & {0.97} & {0.97} & {3000} \\
+{ 0} & {1.00} & {0.87} & {0.93} & {  52} \\
+{ 1} & {0.80} & {0.80} & {0.80} & {   5} \\
+{ 2} & {0.76} & {0.81} & {0.79} & {  48} \\
+{ 3} & {0.82} & {0.73} & {0.77} & { 393} \\
+{ 6} & {1.00} & {1.00} & {1.00} & {1055} \\
+{ 7} & {1.00} & {0.67} & {0.80} & {  48} \\
+{ 8} & {0.98} & {0.98} & {0.98} & { 765} \\
+{ 9} & {0.15} & {0.15} & {0.15} & {  13} \\
+{10} & {0.78} & {0.86} & {0.82} & { 621} \\
+{avg/total} & {0.92} & {0.91} & {0.91} & {3000} \\
     	\end{tabularx}
     	\captionof{table} {Misure di Precision, Recall ed F-Measure per il dataset B, testset casuale di 3000 campioni}
     	\label{tab:b_3ks}
@@ -568,4 +567,6 @@
 
 	Nella relazione svolta, è stata prima svolta la presentazione del dataset utilizzato per la creazione dell'Hidden Markov Model, a cui è seguita la creazione di quest'ultimo.
 	Nell'ultima parte, è stata invece descritta la sperimentazione eseguita, della quale ne sono stati discussi i risultati.
+
+	Il modello risulta essere eccessivamente accurato anche con solo pochi giorni di training, e sembra mostrare dell'overfitting sui dati . Questo ipotizziamo sia dovuto al fatto che la routine della giornata è poco variabile e quindi sono sufficienti pochi giorni di osservazione per avere buone previsioni. Inoltre il modello non prevedere gli stati con la stessa precisione, infatti le attività che mediamente durano di più vengono previste con estrema facilità, mentre quelle più brevi hanno precisioni molto inferiori. Infine abbiamo notato un forte bias nel predirre lo stato relativo a "Nessuna attività".
 \end{document}
