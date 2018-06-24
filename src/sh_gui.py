@@ -91,7 +91,10 @@ class Ui_Dialog(object):
         plot_classification_report(sample, predicted)
         plt.figure(2)
         plot_confusion_matrix(
-            sample, predicted, list(map(str, range(max(sample) + 1)))
+            sample,
+            predicted,
+            list(map(str, range(max(sample) + 1))),
+            normalize=True,
         )
 
         sample_text, predicted_text = self.format_sequences(sample, predicted)
