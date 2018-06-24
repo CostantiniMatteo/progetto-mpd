@@ -1,5 +1,5 @@
 # GLWT
-rom PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtGui, QtWidgets
 import matplotlib.pyplot as plt
 from preprocessing import preprocess
 from smarthouse import smarthouse
